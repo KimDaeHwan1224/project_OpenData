@@ -831,7 +831,8 @@
 	            fillColor: fillColor,
 	            fillOpacity: 0.55
 	        });
-
+			polygon.setMap(map);
+	        polygons.push(polygon);
 	        // 마우스 효과
 	        kakao.maps.event.addListener(polygon, "mouseover", () => {
 	            polygon.setOptions({ fillOpacity: 0.8 });
