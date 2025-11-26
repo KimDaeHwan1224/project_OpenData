@@ -1,166 +1,111 @@
 package com.boot.controller;
 
-import com.boot.dao.BoardDAO;
-import com.boot.dto.AirQualityDTO;
-import com.boot.dto.BoardDTO;
-import com.boot.dto.FavoriteStationDTO;
-import com.boot.dto.StationDTO;
-import com.boot.dto.UserDTO;
-import com.boot.service.AirQualityService;
-import com.boot.service.UserService;
-import com.boot.util.AirQualityCalculator;
-import com.boot.util.ExcelReader;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
-import java.util.Collections;
-import java.util.HashMap;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.boot.dto.AirQualityDTO;
+import com.boot.dto.NoticeBoardAttachDTO;
+import com.boot.dto.NoticeBoardDTO;
+import com.boot.dto.StationDTO;
+import com.boot.service.AirQualityService;
+import com.boot.service.NoticeBoardService;
+import com.boot.util.AirQualityCalculator;
+import com.boot.util.ExcelReader;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Controller
-@RequestMapping("/mypage")
-public class MyPageController {
+@RequiredArgsConstructor
+@Slf4j
+@RequestMapping("/notice")
+public class NoticeController {
 
-    @Autowired
-    UserService userService;
-    
-    @Autowired
-    BoardDAO boardDAO;  
-    
+    private final NoticeBoardService noticeService;
     @Autowired
     private AirQualityService airQualityService;
-    
-    @Autowired
-    private AirQualityCalculator airQualityCalculator;
-    
-    // 마이페이지 화면
+    private final AirQualityCalculator airQualityCalculator;
+
+    /**
+     * ✅ 공지사항 목록 페이지
+     * JSP: /WEB-INF/views/notice/notice.jsp
+     */
     @GetMapping
-    public String mypage(HttpSession session, Model model, @ModelAttribute("msg") String msg) {
+    public String noticeList(@RequestParam(defaultValue = "1") int page,
+                             @RequestParam(defaultValue = "10") int size,
+                             @RequestParam(defaultValue = "tc") String type,
+                             @RequestParam(defaultValue = "") String keyword,
+                             Model model) {
 
-        String user_id = (String) session.getAttribute("loginId");
-        if (user_id == null) return "redirect:/login";
+        List<NoticeBoardDTO> list;
+        int total;
 
-        // ✅ 최신 회원 정보 조회
-        UserDTO user = userService.getUserById(user_id);
-        model.addAttribute("user", user);
+        if (keyword.isEmpty()) {
+            list = noticeService.getPage(page, size);
+            total = noticeService.getTotalCount();
+        } else {
+            list = noticeService.getSearchPage(type, keyword, page, size);
+            total = noticeService.getSearchTotalCount(type, keyword);
+        }
 
-        // ✅ 세션 값 업데이트
-        session.setAttribute("loginDisplayName", user.getUser_name());
-        session.setAttribute("loginId", user.getUser_id());
-        session.setAttribute("userEmail", user.getUser_email());
-        session.setAttribute("userPhone", user.getUser_phone_num());
-        session.setAttribute("userRegDate", user.getReg_date());
+        // ✅ 페이지네이션 계산
+        int pageCount = (int) Math.ceil(total / (double) size);
+        int pageGroupSize = 5;
+        int startPage = ((page - 1) / pageGroupSize) * pageGroupSize + 1;
+        int endPage = Math.min(startPage + pageGroupSize - 1, pageCount);
 
-        // ✅ 관심 지역 리스트 조회
-        List<FavoriteStationDTO> favorites = userService.getFavoriteList(user_id);
-        model.addAttribute("favorites", favorites);
+        model.addAttribute("noticeList", list);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+        model.addAttribute("total", total);
+        model.addAttribute("pageCount", pageCount);
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+        model.addAttribute("keyword", keyword);
+        model.addAttribute("type", type);
 
-        // ✅ 내가 작성한 게시글 목록 조회 (최신 5개)
-        List<BoardDTO> myBoardList = boardDAO.selectMyBoardList(user_id);
-        model.addAttribute("myBoardList", myBoardList);
-
-        
-        // 메시지 전달
-        model.addAttribute("msg", msg);
-        
+        // ✅ 상단 대기질 데이터 (배너용)
         List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
         Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
-
         model.addAttribute("cityAverages", cityAverages.values());
-        return "mypage"; 
+
+        return "notice/notice"; // 사용자용 공지 목록 JSP
     }
 
-    // 회원 정보 수정
-    @PostMapping("/update")
-    public String updateUser(
-            @RequestParam Map<String, String> param,
-            HttpSession session,
-            RedirectAttributes rttr) {
+    /**
+     * ✅ 공지사항 상세보기
+     * JSP: /WEB-INF/views/notice/noticeDetail.jsp
+     */
+    @GetMapping("/detail")
+    public String noticeDetail(@RequestParam("noticeNo") Long noticeNo,
+                               Model model,
+                               HttpSession session) {
 
-        String user_id = (String) session.getAttribute("loginId");
-        param.put("user_id", user_id);   // ✅ user_id 강제 설정
-
-        // ✅ DB 업데이트
-        userService.updateUser(param);
-
-        // ✅ 최신 유저 정보 다시 조회
-        UserDTO updatedUser = userService.getUserById(user_id);
-
-        // ✅ 세션 정보 갱신
-        session.setAttribute("user", updatedUser);
-        session.setAttribute("loginDisplayName", updatedUser.getUser_name());
-
-        rttr.addFlashAttribute("msg", "수정되었습니다!");
-        return "redirect:/mypage";
-    }
-
-    @RestController
-    @RequestMapping("/mypage/region")
-    public class FavoriteController {
-
-        @Autowired
-        private UserService userService; 
-        
-        @DeleteMapping("/{favoriteId}")
-        public ResponseEntity<?> deleteFavoriteById(@PathVariable long favoriteId) {
-            long result = userService.deleteFavoriteById(favoriteId);
-            if(result > 0) {
-                return ResponseEntity.ok(Collections.singletonMap("message", "삭제 성공"));
-            } else {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                                     .body(Collections.singletonMap("message", "삭제 실패"));
-            }
+        NoticeBoardDTO post = noticeService.getById(noticeNo, true);
+        if (post == null) {
+            return "redirect:/notice"; // 존재하지 않으면 목록으로
         }
-    }
-    
- // 회원 탈퇴 페이지
-    @GetMapping("/withdraw")
-    public String withdrawPage(HttpSession session) {
-        String user_id = (String) session.getAttribute("loginId");
-        if (user_id == null) {
-            return "redirect:/login";
-        }
-        
-        return "memberWithdraw";
-    }
 
-    // 일반 회원 탈퇴 처리
-    @PostMapping("/withdraw")
-    public String withdrawProcess(
-            @RequestParam String user_pw,
-            HttpSession session,
-            RedirectAttributes rttr) {
-        
-        String user_id = (String) session.getAttribute("loginId");
-        if (user_id == null) {
-            return "redirect:/login";
-        }
-        
-        // 비밀번호 확인 후 탈퇴
-        Map<String, String> param = new HashMap<>();
-        param.put("user_id", user_id);
-        param.put("user_pw", user_pw);
-        
-        int result = userService.withdraw(param);
-        
-        if (result > 0) {
-            // 탈퇴 성공 - 세션 무효화
-            session.invalidate();
-            rttr.addFlashAttribute("msg", "회원 탈퇴가 완료되었습니다.");
-            return "redirect:/";
-        } else {
-            // 비밀번호 불일치
-            rttr.addFlashAttribute("error", "비밀번호가 일치하지 않습니다.");
-            return "redirect:/mypage/withdraw";
-        }
+        List<NoticeBoardAttachDTO> attaches = noticeService.getAttachments(noticeNo);
+
+        Date noticeDate = post.getNoticeDate() == null ? null :
+                Date.from(post.getNoticeDate().atZone(ZoneId.systemDefault()).toInstant());
+
+        model.addAttribute("post", post);
+        model.addAttribute("attaches", attaches);
+        model.addAttribute("noticeDate", noticeDate);
+
+        return "notice/noticeDetail"; // 사용자용 공지 상세보기 JSP
     }
 }
