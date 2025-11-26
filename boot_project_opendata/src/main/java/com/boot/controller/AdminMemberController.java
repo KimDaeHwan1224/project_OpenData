@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.boot.dto.AirQualityDTO;
 import com.boot.dto.StationDTO;
 import com.boot.service.AdminMemberService;
+import com.boot.service.AirQualityService;
 import com.boot.util.AirQualityCalculator;
 import com.boot.util.ExcelReader;
 
@@ -24,7 +26,7 @@ public class AdminMemberController {
     private AdminMemberService adminMemberService;
     
     @Autowired
-    private ExcelReader excelReader;
+    private AirQualityService airQualityService;
     
     @Autowired
     private AirQualityCalculator airQualityCalculator;
@@ -41,8 +43,8 @@ public class AdminMemberController {
         List<Map<String, Object>> memberList = adminMemberService.getAllMembers();
         model.addAttribute("memberList", memberList);
         
-        List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+        List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
 
         model.addAttribute("cityAverages", cityAverages.values());
         
