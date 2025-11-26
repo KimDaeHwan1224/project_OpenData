@@ -373,7 +373,7 @@
     <a href="#">개인정보처리방침</a>
   </footer>
 
-  <script src="/js/main.js"></script>
+
   <script>
     const toast = (t)=>{ const m=document.getElementById('msg'); m.textContent=t; m.style.display='block'; setTimeout(()=>m.style.display='none',2500); };
     const showLoading = (b)=>{ document.getElementById('loading').style.display = b ? 'block' : 'none'; };
@@ -973,5 +973,6 @@
 	    setTimeout(updateVisibilityByZoom, 50);
 	});
   </script>
+  <script src="/js/main.js"></script>
 </body>
 </html>
