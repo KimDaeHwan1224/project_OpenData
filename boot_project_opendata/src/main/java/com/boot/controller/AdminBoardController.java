@@ -18,9 +18,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.boot.dao.UserDAO;
+import com.boot.dto.AirQualityDTO;
 import com.boot.dto.BoardAttachDTO;
 import com.boot.dto.BoardDTO;
 import com.boot.dto.StationDTO;
+import com.boot.service.AirQualityService;
 import com.boot.service.BoardService;
 import com.boot.util.AirQualityCalculator;
 import com.boot.util.ExcelReader;
@@ -36,9 +38,9 @@ public class AdminBoardController {
     private final BoardService boardService;
     private final UserDAO userDAO;
 
-    @Autowired private ExcelReader excelReader;
     @Autowired private AirQualityCalculator airQualityCalculator;
-
+    @Autowired
+    private AirQualityService airQualityService;
     /**
      * ✅ 관리자 게시판 목록
      */
@@ -87,8 +89,8 @@ public class AdminBoardController {
         model.addAttribute("type", type);
 
         // ✅ 5. 상단 대기질 데이터
-        List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+        List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
         model.addAttribute("cityAverages", cityAverages.values());
 
         return "admin/boardManagement";
@@ -111,8 +113,8 @@ public class AdminBoardController {
         Date boardDate = post.getBoardDate() == null ? null :
             Date.from(post.getBoardDate().atZone(ZoneId.systemDefault()).toInstant());
 
-        List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+        List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
 
         model.addAttribute("post", post);
         model.addAttribute("attaches", attaches);
