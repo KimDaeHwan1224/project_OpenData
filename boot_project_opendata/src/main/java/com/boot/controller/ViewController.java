@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.boot.service.AirQualityService;
 import com.boot.service.UserService;
 import com.boot.util.AirQualityCalculator;
 import com.boot.util.ExcelReader;
+import com.google.gson.Gson;
+import com.boot.dto.AirQualityDTO;
 import com.boot.dto.StationDTO;
 import com.boot.dto.UserDTO;
 
@@ -28,10 +31,10 @@ public class ViewController {
     private UserService userService;
     
     @Autowired
-    private ExcelReader excelReader;
+    private AirQualityCalculator airQualityCalculator;
     
     @Autowired
-    private AirQualityCalculator airQualityCalculator;
+    private AirQualityService airQualityService;
     
     // 메인 페이지
     @GetMapping("/")
@@ -41,10 +44,13 @@ public class ViewController {
     
     @GetMapping("/main")
     public String mainPage(Model model) {
-    	List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+    	// ✅ 전국 모든 측정소 데이터(API + Kakao 좌표 포함)
+        List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
 
         model.addAttribute("cityAverages", cityAverages.values());
+        String sidoAvgJson = new Gson().toJson(cityAverages);
+        model.addAttribute("sidoAvgJson", sidoAvgJson);
         return "main";
     }
     
@@ -82,8 +88,8 @@ public class ViewController {
     // 회원 정보 수정 페이지
     @GetMapping("/mypage/edit")
     public String mypageEdit(HttpSession session, Model model) {
-        List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+        List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
 
         model.addAttribute("cityAverages", cityAverages.values());
         // 로그인 체크
@@ -151,157 +157,20 @@ public class ViewController {
             return "memberEdit";
         }
     }
-    
-//    // 공지사항 목록
-//    @GetMapping("/notice")
-//    public String notice(Model model) {
-//    	List<StationDTO> stations = excelReader.readStations();
-//        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
-//
-//        model.addAttribute("cityAverages", cityAverages.values());
-//        return "notice";
-//    }
-    
-//    // 공지사항 글쓰기 페이지 (관리자만 접근 가능)
-//    @GetMapping("/noticeManagement/noticeWrite")
-//    public String adminWrite(HttpSession session) {
-//    	Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-//    	if (isAdmin == null || !isAdmin) {
-//    		return "redirect:/noticeManagement";
-//    	}
-//    	return "admin/noticeWrite";
-//    }
-    
-    // 공지사항 글쓰기 페이지 (관리자만 접근 가능)
-//    @GetMapping("/notice/write")
-//    public String noticeWrite(HttpSession session) {
-//        // 관리자 권한 체크
-//        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-//        if (isAdmin == null || !isAdmin) {
-//            // 관리자가 아니면 공지사항 목록으로 리다이렉트
-//            return "redirect:/notice";
-//        }
-//        return "noticeWrite";
-//    }
-    
-    // QnA 목록
-    @GetMapping("/qna")
-    public String qna(HttpSession session, Model model) {
-    	List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
-
-        model.addAttribute("cityAverages", cityAverages.values());
-        // 관리자는 QnA 접근 불가 (지역관리 페이지로 이동)
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin != null && isAdmin) {
-            return "redirect:/adminMain";
-        }
-        return "qna";
-    }
-    
-    // QnA 글쓰기 페이지 (로그인 필요)
-    @GetMapping("/qna/write")
-    public String qnaWrite(HttpSession session) {
-        // 로그인 체크
-        String loginDisplayName = (String) session.getAttribute("loginDisplayName");
-        if (loginDisplayName == null || loginDisplayName.isEmpty()) {
-            // 로그인 안되어 있으면 로그인 페이지로 리다이렉트
-            try {
-                String message = URLEncoder.encode("로그인 후 이용 가능합니다", StandardCharsets.UTF_8.toString());
-                return "redirect:/login?message=" + message;
-            } catch (Exception e) {
-                return "redirect:/login";
-            }
-        }
-        
-        // 관리자는 접근 불가
-        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-        if (isAdmin != null && isAdmin) {
-            return "redirect:/adminMain";
-        }
-        
-        return "qnaWrite";
-    }
-    
-    
     // 관리자 메인화면
     @GetMapping("/adminMain")
     public String adminMain(HttpSession session,Model model) {
-    	List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
-        
-        model.addAttribute("cityAverages", cityAverages.values());
-    	// 관리자 권한 체크
-    	Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-    	if (isAdmin == null || !isAdmin) {
-    		// 관리자가 아니면 관리자 로그인 페이지로 리다이렉트
-    		return "redirect:/admin/login";
-    	}
-    	return "admin/adminMain";
-    }
-    
-    // 게시판 목록
-//    @GetMapping("/boardManagement")
-//    public String boardManagement(HttpSession session) {
-//    	// 관리자 권한 체크
-//    	Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-//    	if (isAdmin == null || !isAdmin) {
-//    		return "redirect:/admin/login";
-//    	}
-//        return "admin/boardManagement";
-//    }
-//   
-    // 공지사항 목록
-//    @GetMapping("/noticeManagement")
-//    public String noticeManagement(HttpSession session, Model model) {
-//    	// 관리자 권한 체크
-//    	Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-//    	if (isAdmin == null || !isAdmin) {
-//    		return "redirect:/admin/login";
-//    	}
-//    	List<StationDTO> stations = excelReader.readStations();
-//        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
-//
-//        model.addAttribute("cityAverages", cityAverages.values());
-//    	return "admin/noticeManagement";
-//    }
-//    
-    // QnA 목록
-    @GetMapping("/qnaManagement")
-    public String qnaManagement(HttpSession session, Model model) {
-    	// 관리자 권한 체크
-    	Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
-    	if (isAdmin == null || !isAdmin) {
-    		return "redirect:/admin/login";
-    	}
-    	List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (isAdmin == null || !isAdmin) {
+            return "redirect:/admin/login";
+        }
+
+        List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
 
         model.addAttribute("cityAverages", cityAverages.values());
-    	return "admin/qnaManagement";
+        model.addAttribute("sidoAvgJson", new Gson().toJson(cityAverages));
+
+        return "admin/adminMain";
     }
-    
-    // 게시판 상세 (나중에 구현)
-     @GetMapping("/board/{id}")
-     public String boardDetail(@PathVariable Long id, Model model) {
-         return "boardDetail";
-     }
-     
-     // 관리자 게시판 상세 (나중에 구현)
-     @GetMapping("/boardManagement/{id}")
-     public String boardDetailManagement(@PathVariable Long id, Model model) {
-    	 return "boardDetailManagement";
-     }
-     
-////     공지사항 상세 (나중에 구현)
-//     @GetMapping("/notice/{id}")
-//     public String noticeDetail(@PathVariable Long id, Model model) {
-//         return "noticeDetail";
-//     }
-    
-    // QnA 상세 (나중에 구현)
-     @GetMapping("/qna/{id}")
-     public String qnaDetail(@PathVariable Long id, Model model) {
-         return "qnaDetail";
-     }
 }
