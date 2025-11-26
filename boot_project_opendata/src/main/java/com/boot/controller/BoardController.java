@@ -24,7 +24,9 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.boot.dto.BoardDTO;
 import com.boot.dto.StationDTO;
 import com.boot.dao.UserDAO;
+import com.boot.dto.AirQualityDTO;
 import com.boot.dto.BoardAttachDTO;
+import com.boot.service.AirQualityService;
 import com.boot.service.BoardService;
 import com.boot.util.AirQualityCalculator;
 import com.boot.util.ExcelReader;
@@ -44,7 +46,7 @@ public class BoardController {
     private String uploadDir;
 
     @Autowired
-    private ExcelReader excelReader;
+    private AirQualityService airQualityService;
     
     @Autowired
     private AirQualityCalculator airQualityCalculator;
@@ -158,8 +160,8 @@ public class BoardController {
         model.addAttribute("keyword", keyword);
         model.addAttribute("type", type);
         
-    	List<StationDTO> stations = excelReader.readStations();
-        Map<String, StationDTO> cityAverages = airQualityCalculator.calculateCityAverages(stations);
+    	List<AirQualityDTO> stations = airQualityService.getAllAirQuality();
+        Map<String, AirQualityDTO> cityAverages = airQualityCalculator.calculateSidoAverages(stations);
 
         model.addAttribute("cityAverages", cityAverages.values());
         return "board/list";
