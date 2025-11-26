@@ -1,157 +1,184 @@
 package com.boot.controller;
 
-import com.boot.dto.StationDTO;
-import com.boot.util.ExcelReader;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.ResponseEntity;
+import com.boot.dto.AirQualityDTO;
+import com.boot.service.AirQualityService;
+import com.boot.service.RedisCacheService;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @RestController
 @RequestMapping("/api/air")
-@CrossOrigin(origins = "*")
+@RequiredArgsConstructor
 public class AirApiController {
-    
-    @Autowired
-    private ExcelReader excelReader;
-    
-    private List<StationDTO> cachedStations = null;  // 캐싱
-    
+
+	private final RedisCacheService redisCacheService;
+    private final AirQualityService airQualityService;
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private static final String REDIS_KEY = "AIR:ALL_DATA";
+
     /**
-     * 전국 측정소 목록 조회 (엑셀에서 읽기)
+     * ============================================
+     * 1) 전국 측정소 전체 조회 (17개 시도 API 호출)
+     * ============================================
      */
     @GetMapping("/stations")
     public ResponseEntity<?> getAllStations() {
+
         try {
-            // 캐싱: 한 번만 읽기
-            if (cachedStations == null) {
-                cachedStations = excelReader.readStations();
+            String json = redisCacheService.get(REDIS_KEY);
+
+            // ① 캐싱된 데이터 존재 → 즉시 반환
+            if (json != null) {
+                List<AirQualityDTO> list =
+                        objectMapper.readValue(json, new TypeReference<List<AirQualityDTO>>() {});
+                return ResponseEntity.ok(list);
             }
-            
-            // API 응답 형식으로 변환
-            Map<String, Object> response = new HashMap<>();
-            Map<String, Object> header = new HashMap<>();
-            header.put("resultCode", "00");
-            header.put("resultMsg", "NORMAL_CODE");
-            
-            Map<String, Object> body = new HashMap<>();
-            body.put("items", cachedStations);
-            body.put("totalCount", cachedStations.size());
-            
-            Map<String, Object> wrapper = new HashMap<>();
-            wrapper.put("header", header);
-            wrapper.put("body", body);
-            
-            response.put("response", wrapper);
-            
-            return ResponseEntity.ok(response);
-            
+
+            // ② 캐싱 없음 → 공공데이터 즉시 호출 후 Redis 저장
+            List<AirQualityDTO> list = airQualityService.getAllAirQuality();
+
+            String newJson = objectMapper.writeValueAsString(list);
+            redisCacheService.set(REDIS_KEY, newJson, 3600);
+
+            return ResponseEntity.ok(list);
+
         } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(
-                Map.of("success", false, "message", "엑셀 데이터 로드 실패: " + e.getMessage())
-            );
+            return ResponseEntity.internalServerError()
+                    .body("ERROR: " + e.getMessage());
         }
     }
-    
+
     /**
-     * 측정소별 실시간 데이터 (엑셀에서 읽어온 실제 값 사용)
+     * ============================================
+     * 2) 특정 측정소 상세정보 조회
+     *    (공공데이터 API에서 해당 시도를 다시 조회)
+     * ============================================
      */
     @GetMapping("/station/{stationName}")
-    public ResponseEntity<?> getStationData(@PathVariable String stationName) {
+    public ResponseEntity<?> getStationDetail(@PathVariable String stationName) {
+
         try {
-            if (cachedStations == null) {
-                cachedStations = excelReader.readStations();
+            // 1) Redis에서 전체 데이터 조회
+            String json = redisCacheService.get(REDIS_KEY);
+
+            // ❗ Redis가 null이면 → API 절대 호출 금지
+            if (json == null) {
+                return ResponseEntity.status(503).body(Map.of(
+                        "success", false,
+                        "message", "데이터가 아직 준비되지 않았습니다. 잠시 후 다시 시도해주세요."
+                ));
             }
-            
-            // 측정소 찾기
-            StationDTO station = cachedStations.stream()
-                .filter(s -> s.getStationName().equals(stationName))
-                .findFirst()
-                .orElse(null);
-            
-            if (station == null) {
-                return ResponseEntity.status(404).body(
-                    Map.of("success", false, "message", "측정소를 찾을 수 없습니다: " + stationName)
-                );
-            }
-            
-            // 등급 계산
-            String pm10Grade = getGradeFromValue(station.getPm10Value(), "PM10");
-            String pm25Grade = getGradeFromValue(station.getPm25Value(), "PM25");
-            String o3Grade = getO3Grade(station.getO3Value());
-            String no2Grade = getNO2Grade(station.getNo2Value());
-            
-            Map<String, Object> item = new HashMap<>();
-            item.put("stationName", station.getStationName());
-            item.put("dataTime", "2025-11-04 14:00");
-            item.put("pm10Value", String.valueOf(station.getPm10Value()));
-            item.put("pm10Grade", pm10Grade);
-            item.put("pm25Value", String.valueOf(station.getPm25Value()));
-            item.put("pm25Grade", pm25Grade);
-            item.put("o3Value", String.format("%.3f", station.getO3Value()));
-            item.put("o3Grade", o3Grade);
-            item.put("no2Value", String.format("%.3f", station.getNo2Value()));
-            item.put("no2Grade", no2Grade);
-            item.put("coValue", String.format("%.1f", station.getCoValue()));
-            item.put("so2Value", String.format("%.3f", station.getSo2Value()));
-            
-            Map<String, Object> response = new HashMap<>();
-            Map<String, Object> body = new HashMap<>();
-            body.put("items", List.of(item));
-            
-            Map<String, Object> wrapper = new HashMap<>();
-            wrapper.put("body", body);
-            
-            response.put("response", wrapper);
-            
-            return ResponseEntity.ok(response);
-            
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.status(500).body(
-                Map.of("success", false, "message", "데이터 조회 실패: " + e.getMessage())
+
+            // 2) JSON → List 변환
+            List<AirQualityDTO> all = objectMapper.readValue(
+                    json,
+                    new TypeReference<List<AirQualityDTO>>() {}
             );
+
+            // 3) 해당 측정소 찾기
+            Optional<AirQualityDTO> match = all.stream()
+                    .filter(s -> s.getStationName().equals(stationName))
+                    .findFirst();
+
+            if (match.isEmpty()) {
+                return ResponseEntity.status(404).body(Map.of(
+                        "success", false,
+                        "message", stationName + " 측정소 데이터 없음"
+                ));
+            }
+
+            AirQualityDTO dto = match.get();
+
+            // 4) 기존 JS 구조 유지
+            Map<String, Object> item = new HashMap<>();
+            item.put("stationName", dto.getStationName());
+            item.put("sidoName", dto.getSidoName());
+            item.put("dataTime", dto.getDataTime());
+
+            item.put("pm10Value", dto.getPm10Value());
+            item.put("pm25Value", dto.getPm25Value());
+            item.put("o3Value", dto.getO3Value());
+            item.put("no2Value", dto.getNo2Value());
+            item.put("coValue", dto.getCoValue());
+            item.put("so2Value", dto.getSo2Value());
+
+            item.put("pm10Grade", dto.getPm10Grade());
+            item.put("pm25Grade", dto.getPm25Grade());
+            item.put("o3Grade", dto.getO3Grade());
+            item.put("no2Grade", dto.getNo2Grade());
+            item.put("khaiValue", dto.getKhaiValue());
+            item.put("khaiGrade", dto.getKhaiGrade());
+
+            item.put("calcO3", dto.getO3Grade());    
+            item.put("calcNO2", dto.getNo2Grade());  
+            Map<String, Object> body = Map.of("items", List.of(item));
+            Map<String, Object> wrapper = Map.of("body", body);
+            Map<String, Object> response = Map.of("response", wrapper);
+
+            return ResponseEntity.ok(response);
+
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body("ERROR: " + e.getMessage());
         }
     }
-    
-    private String getGradeFromValue(int value, String type) {
-        if (type.equals("PM10")) {
-            if (value <= 30) return "1";
-            if (value <= 80) return "2";
-            if (value <= 150) return "3";
-            return "4";
-        } else {  // PM25
-            if (value <= 15) return "1";
-            if (value <= 35) return "2";
-            if (value <= 75) return "3";
-            return "4";
-        }
-    }
-    
-    private String getO3Grade(double value) {
-        if (value <= 0.030) return "1";
-        if (value <= 0.090) return "2";
-        if (value <= 0.150) return "3";
-        return "4";
-    }
-    
-    private String getNO2Grade(double value) {
-        if (value <= 0.030) return "1";
-        if (value <= 0.060) return "2";
-        if (value <= 0.200) return "3";
-        return "4";
-    }
-    
+
+
+    /**
+     * ============================================
+     * 3) 건강체크 (테스트용)
+     * ============================================
+     */
     @GetMapping("/health")
     public ResponseEntity<?> healthCheck() {
-        int count = cachedStations != null ? cachedStations.size() : 0;
         return ResponseEntity.ok(Map.of(
-            "status", "OK",
-            "message", "엑셀 기반 실제 데이터 모드",
-            "mode", "EXCEL_DATA",
-            "stationCount", count
+                "status", "OK",
+                "mode", "PUBLIC_DATA",
+                "message", "공공데이터 API 사용중"
         ));
+    }
+
+
+    /**
+     * ============================================
+     * 4) CSV 다운로드 (공공데이터 기반)
+     * ============================================
+     */
+    @GetMapping("/download/csv")
+    public void downloadCsv(javax.servlet.http.HttpServletResponse response) throws Exception {
+
+        List<AirQualityDTO> list = airQualityService.getAllAirQuality();
+
+        response.setContentType("text/csv; charset=UTF-8");
+        response.setHeader("Content-Disposition",
+                "attachment; filename=" +
+                        URLEncoder.encode("air_quality.csv", StandardCharsets.UTF_8));
+
+        // BOM 추가
+        response.getOutputStream().write(new byte[]{(byte)0xEF,(byte)0xBB,(byte)0xBF});
+
+        var writer = new java.io.PrintWriter(response.getOutputStream(), true, StandardCharsets.UTF_8);
+
+        writer.println("측정소,시도,위도,경도,PM10,PM2.5,O3,NO2,CO,SO2");
+
+        for (AirQualityDTO s : list) {
+            writer.printf("%s,%s,%f,%f,%d,%d,%f,%f,%f,%f\n",
+                    s.getStationName(), s.getSidoName(),
+                    s.getDmY(), s.getDmX(),
+                    s.getPm10Value(), s.getPm25Value(),
+                    s.getO3Value(), s.getNo2Value(),
+                    s.getCoValue(), s.getSo2Value()
+            );
+        }
+        writer.flush();
     }
 }
