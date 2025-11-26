@@ -394,6 +394,7 @@
 	    const response = await fetch('/api/air/stations');
 	    if (!response.ok) throw new Error('API 호출 실패 ' + response.status);
 		const stations = await response.json();   // 🚀 리스트 직접 받기!
+		window.allStations = stations;
 	    displayStations(stations);
 	    toast('측정소 ' + stations.length + '개 로드 완료');
 	  } catch(e) {
@@ -414,26 +415,39 @@
 	        }
 	    });
 	});
-    function displayStations(stations) {
-      markers.forEach(m => m.setMap(null));
-      markers.length = 0;
+	function displayStations(stations) {
+	  // 기존 마커 제거
+	  markers.forEach(m => m.setMap(null));
+	  markers.length = 0;
 
-      stations.forEach(station => {
-        if (!station.dmX || !station.dmY) return;
-        const position = new kakao.maps.LatLng(station.dmY, station.dmX);
-        const content = document.createElement('div');
-        content.className = 'custom-marker marker-normal';
-        content.textContent = station.stationName;
-        const overlay = new kakao.maps.CustomOverlay({ position, content, yAnchor: 1 });
-        overlay.setMap(map);
-        markers.push(overlay);
-        
-        content.addEventListener('click', (e) => {
-          e.stopPropagation();  // ✅ 이벤트 전파 방지
-          loadStationDetail(station.stationName, position);
-        });
-      });
-    }
+	  // 🔥 지금 줌 레벨 기준
+	  const isZoomedIn = map.getLevel() <= 9;
+
+	  stations.forEach(station => {
+	    if (!station.dmX || !station.dmY) return;
+
+	    const position = new kakao.maps.LatLng(station.dmY, station.dmX);
+	    const content = document.createElement('div');
+	    content.className = 'custom-marker marker-normal';
+	    content.textContent = station.stationName;
+
+	    const overlay = new kakao.maps.CustomOverlay({
+	      position,
+	      content,
+	      yAnchor: 1
+	    });
+
+	    // 🔥 확대 상태일 때만 마커를 지도에 올리기
+	    overlay.setMap(isZoomedIn ? map : null);
+
+	    markers.push(overlay);
+
+	    content.addEventListener('click', (e) => {
+	      e.stopPropagation();
+	      loadStationDetail(station.stationName, position);
+	    });
+	  });
+	}
 
 	async function loadStationDetail(stationName, position) {
 	  showLoading(true);
@@ -617,18 +631,45 @@
      console.log('✅ showInfoWindow 완료');
    }
 
-    document.getElementById('btnSearch').addEventListener('click', () => {
-      const query = document.getElementById('searchInput').value.trim();
-      if (!query) return toast('검색어를 입력하세요');
-      geocoder.addressSearch(query, (res, status) => {
-        if (status === kakao.maps.services.Status.OK) {
-          const latlng = new kakao.maps.LatLng(res[0].y, res[0].x);
-          map.setCenter(latlng);
-          map.setLevel(5);
-        } else toast('검색 결과가 없습니다');
-      });
-    });
+   document.getElementById('btnSearch').addEventListener('click', async () => {
+       const query = document.getElementById('searchInput').value.trim();
+       if (!query) return toast('검색어를 입력하세요');
 
+       // 1️⃣ 측정소 이름 부분 검색
+       const lower = query.toLowerCase();
+       const matches = window.allStations?.filter(s =>
+           s.stationName.toLowerCase().includes(lower)
+       );
+
+       if (matches && matches.length > 0) {
+           // 가장 첫 번째 관측소로 이동
+           const target = matches[0];
+           
+           const latlng = new kakao.maps.LatLng(target.dmY, target.dmX);
+           map.setCenter(latlng);
+           map.setLevel(6);
+
+           loadStationDetail(target.stationName, latlng);
+           return;
+       }
+	
+       // 2️⃣ 관측소 이름에 없으면 → 주소 검색 fallback
+       geocoder.addressSearch(query, (res, status) => {
+           if (status === kakao.maps.services.Status.OK) {
+               const latlng = new kakao.maps.LatLng(res[0].y, res[0].x);
+               map.setCenter(latlng);
+               map.setLevel(6);
+           } else {
+               toast('검색 결과가 없습니다');
+           }
+       });
+   });
+   document.getElementById('searchInput').addEventListener('keydown', (e) => {
+       if (e.key === 'Enter') {
+           e.preventDefault(); // 폼 제출 방지
+           document.getElementById('btnSearch').click(); // 검색 버튼 클릭과 같은 동작
+       }
+   });
    document.getElementById('btnMyPos').addEventListener('click', () => {
         // ✅ 고정 좌표 지정
         const fixedLat = 35.1487052773634;
@@ -651,7 +692,13 @@
         toast('내 위치로 이동했습니다');
       });
 
-    document.getElementById('btnRefresh').addEventListener('click', loadAllStations);
+	document.getElementById('btnRefresh').addEventListener('click', async () => {
+	    await loadAllStations();
+	    // 혹시 모를 상태 꼬임 방지용
+	    const level = map.getLevel();
+	    markers.forEach(m => m.setMap(level <= 9 ? map : null));
+	    polygons.forEach(p => p.setMap(level <= 9 ? null : map));
+	});
     window.addEventListener('load', loadAllStations);
 	
 	document.getElementById("btnCsv").addEventListener("click", () => {
@@ -732,6 +779,7 @@
 	/* =========================================================
 	   4) 시도 경계 GeoJSON 받아서 폴리곤 그리기
 	   ========================================================= */
+	const polygons = [];
 	function drawSidoRegions(geojson) {
 
 	    geojson.features.forEach(feature => {
@@ -787,9 +835,22 @@
 	            polygon.setOptions({ fillOpacity: 0.55 });
 	        });
 
-	        kakao.maps.event.addListener(polygon, "click", () => {
-	            alert(`${sidoFull}\n등급 : ${grade}\nPM10 : ${avgObj.pm10Value} μg/m³`);
-	        });
+			kakao.maps.event.addListener(polygon, "click", (mouseEvent) => {
+			    // 1) 클릭한 실제 좌표
+			    const clickPos = mouseEvent.latLng;
+
+			    console.log("시도 클릭:", sidoFull, "클릭좌표:", clickPos.getLat(), clickPos.getLng());
+
+			    // 2) 폴리곤은 숨기고 마커는 보이게
+			    polygons.forEach(p => p.setMap(null));
+			    markers.forEach(m => m.setMap(map));
+
+			    // 3) 클릭한 지점으로 이동 + 관측소가 잘 보이는 레벨로 확대
+			    map.setCenter(clickPos);
+			    map.setLevel(9);  // 🔥 조절 가능: 7~9 추천
+
+			    toast(`${sidoFull} 지역으로 이동했습니다.`);
+			});
 	    });
 	}
 
@@ -805,6 +866,81 @@
 	        drawSidoRegions(json);
 	    })
 	    .catch(err => console.error("❌ 시도 GeoJSON 로드 실패:", err));
+// 6) 폴리곤 & 마커 ON/OFF 처리
+	kakao.maps.event.addListener(map, 'zoom_changed', function () {
+	    const level = map.getLevel();
+
+	    // 마커 표시: 확대일 때만
+	    markers.forEach(marker => {
+	        if (level <= 9) marker.setMap(map);
+	        else marker.setMap(null);
+	    });
+
+	    // 폴리곤 표시: 축소일 때만
+	    polygons.forEach(poly => {
+	        if (level <= 9) poly.setMap(null);   // 시도 폴리곤 숨김 (확대 시)
+	        else poly.setMap(map);               // 축소 시 다시 보임
+	    });
+	});
+	// GeoJSON paths(엄청 깊은 배열) → bounds 로 넣어주는 재귀 함수
+	function addBoundsFromPaths(arr, bounds) {
+	  if (!arr) return;
+
+	  arr.forEach(item => {
+	    // LatLng 객체
+	    if (item instanceof kakao.maps.LatLng) {
+	      bounds.extend(item);
+	    }
+	    // [lng, lat] 숫자 배열
+	    else if (
+	      Array.isArray(item) &&
+	      item.length === 2 &&
+	      typeof item[0] === "number" &&
+	      typeof item[1] === "number"
+	    ) {
+	      const latlng = new kakao.maps.LatLng(item[1], item[0]);
+	      bounds.extend(latlng);
+	    }
+	    // 더 깊은 배열
+	    else if (Array.isArray(item)) {
+	      addBoundsFromPaths(item, bounds);
+	    }
+	  });
+	}
+	// 지도 줌 변경 시 저장
+	kakao.maps.event.addListener(map, 'zoom_changed', () => {
+	    localStorage.setItem("savedLevel", map.getLevel());
+	});
+
+	// 지도 이동 시 저장
+	kakao.maps.event.addListener(map, 'center_changed', () => {
+	    const c = map.getCenter();
+	    localStorage.setItem("savedLat", c.getLat());
+	    localStorage.setItem("savedLng", c.getLng());
+	});
+	// 저장된 지도 상태가 있으면 복원
+	const savedLevel = localStorage.getItem("savedLevel");
+	const savedLat = localStorage.getItem("savedLat");
+	const savedLng = localStorage.getItem("savedLng");
+
+	if (savedLevel && savedLat && savedLng) {
+	    map.setLevel(Number(savedLevel));
+	    map.setCenter(new kakao.maps.LatLng(Number(savedLat), Number(savedLng)));
+	}
+	function updateVisibilityByZoom() {
+	    const level = map.getLevel();
+
+	    markers.forEach(marker => {
+	        marker.setMap(level <= 9 ? map : null);
+	    });
+
+	    polygons.forEach(poly => {
+	        poly.setMap(level <= 9 ? null : map);
+	    });
+	}
+	window.addEventListener("load", () => {
+	    setTimeout(updateVisibilityByZoom, 50);
+	});
   </script>
 </body>
 </html>
