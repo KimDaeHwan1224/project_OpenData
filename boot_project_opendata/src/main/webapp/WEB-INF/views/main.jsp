@@ -1,4 +1,3 @@
-<!-- 지도 안 뜨면 main.js 스크립트 주석 -->
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
@@ -18,88 +17,87 @@
   <!-- Kakao Map SDK -->
   <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=246b6a1fdd8897003813a81be5f97cd5&libraries=services,clusterer"></script>
   <script src="/js/banner.js"></script>
-  <script src="/js/main.js"></script>
   <!-- ✅ CSS 파일 링크 -->
   <link rel="stylesheet" href="<c:url value='/css/main.css'/>">
   <style>
-	.compare-btn {
-	  width: 100%;
-	  background: #2563eb;
-	  color: white;
-	  padding: 8px 0;
-	  margin-top: 12px;
-	  border-radius: 6px;
-	  border: none;
-	  cursor: pointer;
-	  font-weight: 600;
-	}
+   .compare-btn {
+     width: 100%;
+     background: #2563eb;
+     color: white;
+     padding: 8px 0;
+     margin-top: 12px;
+     border-radius: 6px;
+     border: none;
+     cursor: pointer;
+     font-weight: 600;
+   }
 
-	.compare-btn:hover {
-	  background: #1d4ed8;
-	}
-	.compare-panel {
-	  position: fixed;
-	  bottom: 20px;
-	  right: 20px;
-	  width: 350px;
-	  background: white;
-	  border-radius: 12px;
-	  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-	  padding: 15px;
-	  z-index: 9999;
-	}
+   .compare-btn:hover {
+     background: #1d4ed8;
+   }
+   .compare-panel {
+     position: fixed;
+     bottom: 20px;
+     right: 20px;
+     width: 350px;
+     background: white;
+     border-radius: 12px;
+     box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+     padding: 15px;
+     z-index: 9999;
+   }
 
-	.compare-header {
-	  display: flex;
-	  justify-content: space-between;
-	  font-weight: bold;
-	  margin-bottom: 12px;
-	  font-size: 16px;
-	}
+   .compare-header {
+     display: flex;
+     justify-content: space-between;
+     font-weight: bold;
+     margin-bottom: 12px;
+     font-size: 16px;
+   }
 
-	.compare-header button {
-	  border: none;
-	  background: none;
-	  cursor: pointer;
-	  font-size: 18px;
-	}
+   .compare-header button {
+     border: none;
+     background: none;
+     cursor: pointer;
+     font-size: 18px;
+   }
 
-	.compare-table {
-	  width: 100%;
-	  border-collapse: collapse;
-	}
+   .compare-table {
+     width: 100%;
+     border-collapse: collapse;
+   }
 
-	.compare-table th,
-	.compare-table td {
-	  padding: 6px 4px;
-	  border-bottom: 1px solid #eee;
-	  text-align: right;
-	}
+   .compare-table th,
+   .compare-table td {
+     padding: 6px 4px;
+     border-bottom: 1px solid #eee;
+     text-align: right;
+   }
 
-	.compare-table th {
-	  text-align: left;
-	  font-weight: 600;
-	  color: #333;
-	}
+   .compare-table th {
+     text-align: left;
+     font-weight: 600;
+     color: #333;
+   }
 
-	.highlight-good { color: #22c55e; font-weight: bold; }
-	.highlight-bad  { color: #ef4444; font-weight: bold; }
+   .highlight-good { color: #22c55e; font-weight: bold; }
+   .highlight-bad  { color: #ef4444; font-weight: bold; }
 
-	.compare-select-info {
-	  font-size: 13px;
-	  margin-bottom: 10px;
-	  color: #666;
-	}
-	
+   .compare-select-info {
+     font-size: 13px;
+     margin-bottom: 10px;
+     color: #666;
+   }
+   
   </style>
 </head>
 <body>
 <script>
-	  		      window.sessionExpireAt = ${sessionScope.sessionExpireAt == null ? 0 : sessionScope.sessionExpireAt};
-	  		      window.isLoggedIn = ${not empty sessionScope.loginId};
-	  		  </script>
+                 window.sessionExpireAt = ${sessionScope.sessionExpireAt == null ? 0 : sessionScope.sessionExpireAt};
+                 window.isLoggedIn = ${not empty sessionScope.loginId};
+             </script>
 
-	  		  <script src="/js/sessionTimer.js"></script>
+             <script src="/js/sessionTimer.js"></script>
 
   <!-- 헤더 & 네비 -->
   <header>
@@ -114,21 +112,21 @@
             <a href="<c:url value='/admin/login'/>">관리자정보</a>
           </c:when>
           <%-- 로그인 후 --%>
-		    <c:otherwise>
-		      <c:if test="${sessionScope.isAdmin != true}">
-		        <a href="<c:url value='/mypage'/>">마이페이지</a>
-		      </c:if>
-		      <a href="<c:url value='/logout'/>">로그아웃</a>
-		      <span class="user-name"><c:out value="${sessionScope.loginDisplayName}"/>님</span>
-				<!-- ⏱ 세션 타이머 -->
-			         <c:if test="${not empty sessionScope.loginId}">
-			             <span id="session-timer" style="margin-left:15px; font-weight:bold; font-size:16px; color:#333;">
-			             </span>
-			         </c:if>
-		    </c:otherwise>
-		  </c:choose>
+          <c:otherwise>
+            <c:if test="${sessionScope.isAdmin != true}">
+              <a href="<c:url value='/mypage'/>">마이페이지</a>
+            </c:if>
+            <a href="<c:url value='/logout'/>">로그아웃</a>
+            <span class="user-name"><c:out value="${sessionScope.loginDisplayName}"/>님</span>
+            <!-- ⏱ 세션 타이머 -->
+                  <c:if test="${not empty sessionScope.loginId}">
+                      <span id="session-timer" style="margin-left:15px; font-weight:bold; font-size:16px; color:#333;">
+                      </span>
+                  </c:if>
+          </c:otherwise>
+        </c:choose>
       </div>
-	  <div class="city-banner-wrapper">
+     <div class="city-banner-wrapper">
       <div class="city-slide" id="headerCitySlide">
         <c:forEach var="city" items="${cityAverages}">
           <div class="city-slide-item">
@@ -177,12 +175,12 @@
         <a href="/main" class="nav-category">상세정보</a>
         <a href="/board/list" class="nav-board">게시판</a>
         <a href="/notice" class="nav-notice">공지사항</a>
-		<a href="<c:url value='/inquiry'/>" class="nav-inquiry">1:1 문의</a>
+      <a href="<c:url value='/inquiry'/>" class="nav-inquiry">1:1 문의</a>
       </div>
     </div>
   </div>
   <main>
-   <h2 class="section-title">실시간 대기질 정보</h2>
+<!--   <h2 class="section-title">실시간 대기질 정보</h2>-->
     <!-- 카카오 지도 섹션 (코드1의 고급 지도 기능) -->
    <section class="map-section">
      <div class="map-wrapper">
@@ -200,7 +198,7 @@
         display: none;">
         데이터 로딩중...
       </div>
-		
+      
        <!-- 지도 위 오버레이 -->
        <div class="map-overlay">
          <div class="overlay-search">
@@ -209,9 +207,9 @@
            <button id="btnMyPos">내 위치</button>
            <button id="btnRefresh">새로고침</button>
          </div>
-		 <button id="btnPolygonMode">폴리곤 모드</button>
-		 <button id="btnNormalMode" style="display:none;">일반 모드</button>
-		 
+       <button id="btnPolygonMode">폴리곤 모드</button>
+       <button id="btnNormalMode" style="display:none;">일반 모드</button>
+       
          <div class="overlay-left">
            <h3>대기질 등급</h3>
            <ul>
@@ -234,40 +232,40 @@
           <h3> 주요 도시 대기질</h2>
             
           <div class="city-list">
-			<c:forEach var="city" items="${cityAverages}">
-	        <div class="city-card">
-	          <div class="city-header">
-	            <h3 class="city-name">${city.stationName}</h3>
+         <c:forEach var="city" items="${cityAverages}">
+           <div class="city-card">
+             <div class="city-header">
+               <h3 class="city-name">${city.stationName}</h3>
 
-	            <c:choose>
-					<c:when test="${city.khaiGrade <= 50}">
-					    <span class="city-grade good">좋음</span>
-					</c:when>
-					<c:when test="${city.khaiGrade <= 100}">
-					    <span class="city-grade normal">보통</span>
-					</c:when>
-					<c:when test="${city.khaiGrade <= 250}">
-					    <span class="city-grade bad">나쁨</span>
-					</c:when>
-					<c:otherwise>
-					    <span class="city-grade very-bad">매우나쁨</span>
-					</span>
-	              </c:otherwise>
-	            </c:choose>
-	          </div>
+               <c:choose>
+               <c:when test="${city.khaiGrade <= 50}">
+                   <span class="city-grade good">좋음</span>
+               </c:when>
+               <c:when test="${city.khaiGrade <= 100}">
+                   <span class="city-grade normal">보통</span>
+               </c:when>
+               <c:when test="${city.khaiGrade <= 250}">
+                   <span class="city-grade bad">나쁨</span>
+               </c:when>
+               <c:otherwise>
+                   <span class="city-grade very-bad">매우나쁨</span>
+               </span>
+                 </c:otherwise>
+               </c:choose>
+             </div>
 
-	          <div class="city-info">
-	            <div class="city-info-item">
-	              <span class="city-info-label">미세먼지</span>
-	              <span class="city-info-value">${city.pm10Value} ㎍/㎥</span>
-	            </div>
-	            <div class="city-info-item">
-	              <span class="city-info-label">초미세먼지</span>
-	              <span class="city-info-value">${city.pm25Value} ㎍/㎥</span>
-	            </div>
-	          </div>
-	        </div>
-	      </c:forEach>
+             <div class="city-info">
+               <div class="city-info-item">
+                 <span class="city-info-label">미세먼지</span>
+                 <span class="city-info-value">${city.pm10Value} ㎍/㎥</span>
+               </div>
+               <div class="city-info-item">
+                 <span class="city-info-label">초미세먼지</span>
+                 <span class="city-info-value">${city.pm25Value} ㎍/㎥</span>
+               </div>
+             </div>
+           </div>
+         </c:forEach>
           </div>
         </div>
 
@@ -280,7 +278,7 @@
           </div>
         </div>
 
-		<!-- ✅ 새로 추가된 건강 정보 박스 -->
+      <!-- ✅ 새로 추가된 건강 정보 박스 -->
         <div class="overlay-health">
           <h2>🏥 건강 정보</h2>
           <div class="health-row">
@@ -302,7 +300,7 @@
             </div>
           </div>
         </div>
-		
+      
        </div>
      </div>
    </section>
@@ -340,30 +338,30 @@
 
   </main>
   <!-- 챗봇 플로팅 버튼 -->
-    	<div id="chatbot-float-btn">
-    	  <button id="chatbotBtn" aria-label="챗봇 열기">
-    		<img src="/img/chatbot2.png" alt="챗봇 아이콘" style="width: 40px; height: 40px; bottom:20px;">
-    	  </button>
-    	</div>
+       <div id="chatbot-float-btn">
+         <button id="chatbotBtn" aria-label="챗봇 열기">
+          <img src="/img/chatbot2.png" alt="챗봇 아이콘" style="width: 40px; height: 40px; bottom:20px;">
+         </button>
+       </div>
 
-    	<!-- 챗봇 창(초기 숨김) -->
-    	<div id="chatbotModal" class="chatbot-modal" style="display:none;">
-    	  <div class="chatbot-window">
+       <!-- 챗봇 창(초기 숨김) -->
+       <div id="chatbotModal" class="chatbot-modal" style="display:none;">
+         <div class="chatbot-window">
 
-    	    <!-- 닫기 버튼 -->
-    	    <button id="chatbotClose" class="chatbot-close">✕</button>
+           <!-- 닫기 버튼 -->
+           <button id="chatbotClose" class="chatbot-close">✕</button>
 
-    	    <!-- 대화 내용 -->
-    	    <div id="chatMessages" class="chat-messages"></div>
+           <!-- 대화 내용 -->
+           <div id="chatMessages" class="chat-messages"></div>
 
-    	    <!-- 입력 영역 -->
-    	    <div class="chat-input-box">
-    	      <input id="chatInput" type="text" placeholder="메시지를 입력하세요" />
-    	      <button id="sendBtn" class="chat-send-btn">전송</button>
-    	    </div>
+           <!-- 입력 영역 -->
+           <div class="chat-input-box">
+             <input id="chatInput" type="text" placeholder="메시지를 입력하세요" />
+             <button id="sendBtn" class="chat-send-btn">전송</button>
+           </div>
 
-    	  </div>
-    	</div>
+         </div>
+       </div>
   <!-- 푸터 -->
   <footer class="footer">
     <h2>대기질 정보 시스템</h2>
@@ -435,8 +433,8 @@
       try {
         const response = await fetch('/api/air/stations');
         if (!response.ok) throw new Error('API 호출 실패 ' + response.status);
-		const stations = await response.json();   // 🚀 리스트 직접 받기!
-		window.allStations = stations;
+      const stations = await response.json();   // 🚀 리스트 직접 받기!
+      window.allStations = stations;
         displayStations(stations);
         toast('측정소 ' + stations.length + '개 로드 완료');
       } catch(e) {
@@ -447,60 +445,60 @@
       }
     }
 
-	function displayStations(stations) {
-	  // 기존 마커 제거
-	  markers.forEach(m => m.setMap(null));
-	  markers.length = 0;
+   function displayStations(stations) {
+     // 기존 마커 제거
+     markers.forEach(m => m.setMap(null));
+     markers.length = 0;
 
-	  // 🔥 지금 줌 레벨 기준
-	  const isZoomedIn = map.getLevel() <= 9;
+     // 🔥 지금 줌 레벨 기준
+     const isZoomedIn = map.getLevel() <= 9;
 
-	  stations.forEach(station => {
-	    if (!station.dmX || !station.dmY) return;
+     stations.forEach(station => {
+       if (!station.dmX || !station.dmY) return;
 
-	    const position = new kakao.maps.LatLng(station.dmY, station.dmX);
-	    const content = document.createElement('div');
-	    content.className = 'custom-marker marker-normal';
-	    content.textContent = station.stationName;
+       const position = new kakao.maps.LatLng(station.dmY, station.dmX);
+       const content = document.createElement('div');
+       content.className = 'custom-marker marker-normal';
+       content.textContent = station.stationName;
 
-	    const overlay = new kakao.maps.CustomOverlay({
-	      position,
-	      content,
-	      yAnchor: 1
-	    });
+       const overlay = new kakao.maps.CustomOverlay({
+         position,
+         content,
+         yAnchor: 1
+       });
 
-	    // 🔥 확대 상태일 때만 마커를 지도에 올리기
-	    overlay.setMap(isZoomedIn ? map : null);
+       // 🔥 확대 상태일 때만 마커를 지도에 올리기
+       overlay.setMap(isZoomedIn ? map : null);
 
-	    markers.push(overlay);
+       markers.push(overlay);
 
-	    content.addEventListener('click', (e) => {
-	      e.stopPropagation();
-	      loadStationDetail(station.stationName, position);
-	    });
-	  });
-	}
+       content.addEventListener('click', (e) => {
+         e.stopPropagation();
+         loadStationDetail(station.stationName, position);
+       });
+     });
+   }
 
-	async function loadStationDetail(stationName, position) {
-	  showLoading(true);
-	  try {
+   async function loadStationDetail(stationName, position) {
+     showLoading(true);
+     try {
 
-	    const res = await fetch('/api/air/station/' + encodeURIComponent(stationName));
-	    if (!res.ok) throw new Error("상세 API 오류");
+       const res = await fetch('/api/air/station/' + encodeURIComponent(stationName));
+       if (!res.ok) throw new Error("상세 API 오류");
 
-	    const json = await res.json();
-	    const item = json.response.body.items[0];
+       const json = await res.json();
+       const item = json.response.body.items[0];
 
-	    if (!item) { toast('측정 데이터를 불러올 수 없습니다'); return; }
+       if (!item) { toast('측정 데이터를 불러올 수 없습니다'); return; }
 
-	    showInfoWindow(stationName, item, position);
-	  } catch(e) {
-	    console.error(e);
-	    toast('데이터 로드 실패');
-	  } finally {
-	    showLoading(false);
-	  }
-	}
+       showInfoWindow(stationName, item, position);
+     } catch(e) {
+       console.error(e);
+       toast('데이터 로드 실패');
+     } finally {
+       showLoading(false);
+     }
+   }
     function getGradeText(grade) {
       const grades = { '1': '좋음', '2': '보통', '3': '나쁨', '4': '매우나쁨' };
       return grades[grade] || '-';
@@ -573,7 +571,7 @@
        
        return false;  // ✅ 추가
      };
-	 
+    
      // ✅ mousedown도 차단
      favSpan.onmousedown = function(e) {
        e.preventDefault();
@@ -584,7 +582,7 @@
      titleDiv.appendChild(titleSpan);
      titleDiv.appendChild(favSpan);
      content.appendChild(titleDiv);
-	
+   
      function createInfoItem(label, value, gradeClass) {
        const item = document.createElement('div');
        item.className = 'info-item';
@@ -604,17 +602,17 @@
 
      content.appendChild(createInfoItem('미세먼지(PM10)', fmt(data.pm10Value || '-') + '㎍/m³ (' + getGradeText(data.pm10Grade) + ')', getGradeClass(data.pm10Grade)));
      content.appendChild(createInfoItem('초미세먼지(PM2.5)', fmt(data.pm25Value || '-') + '㎍/m³ (' + getGradeText(data.pm25Grade) + ')', getGradeClass(data.pm25Grade)));
-	 content.appendChild(createInfoItem(
-	   '오존(O₃)',
-	   fmt(data.o3Value || '-') + 'ppm (' + getGradeText(String(data.o3Grade)) + ')',
-	   getGradeClass(String(data.o3Grade))
-	 ));
+    content.appendChild(createInfoItem(
+      '오존(O₃)',
+      fmt(data.o3Value || '-') + 'ppm (' + getGradeText(String(data.o3Grade)) + ')',
+      getGradeClass(String(data.o3Grade))
+    ));
 
-	 content.appendChild(createInfoItem(
-	   '이산화질소(NO₂)',
-	   fmt(data.no2Value || '-') + 'ppm (' + getGradeText(String(data.no2Grade)) + ')',
-	   getGradeClass(String(data.no2Grade))
-	 ));
+    content.appendChild(createInfoItem(
+      '이산화질소(NO₂)',
+      fmt(data.no2Value || '-') + 'ppm (' + getGradeText(String(data.no2Grade)) + ')',
+      getGradeClass(String(data.no2Grade))
+    ));
      content.appendChild(createInfoItem('일산화탄소(CO)', fmt(data.coValue || '-') + 'ppm', ''));
      content.appendChild(createInfoItem('아황산가스(SO₂)', fmt(data.so2Value || '-') + 'ppm', ''));
 
@@ -624,14 +622,16 @@
      timeDiv.style.color = '#999';
      timeDiv.textContent = '측정시간: ' + (data.dataTime || '-');
      content.appendChild(timeDiv);
-	
-	 const compareBtn = document.createElement("button");
-	 compareBtn.className = "compare-btn";
-	 compareBtn.textContent = "상세보기";
-	 compareBtn.onclick = () => addToCompare(stationName, data);
+   
+    const compareBtn = document.createElement("button");
+    compareBtn.className = "compare-btn";
+    compareBtn.textContent = "상세보기";
+    compareBtn.onclick = () => {
+        window.location.href = "/station/detail?name=" + encodeURIComponent(stationName);
+    };
 
-	 content.appendChild(compareBtn);
-	 
+    content.appendChild(compareBtn);
+    
      const overlay = new kakao.maps.CustomOverlay({
        position, 
        content, 
@@ -724,256 +724,372 @@
         toast('내 위치로 이동했습니다');
       });
 
-	document.getElementById('btnRefresh').addEventListener('click', async () => {
-	    await loadAllStations();
-	    // 혹시 모를 상태 꼬임 방지용
-	    const level = map.getLevel();
-	    markers.forEach(m => m.setMap(level <= 9 ? map : null));
-	    polygons.forEach(p => p.setMap(level <= 9 ? null : map));
-	});
+   document.getElementById('btnRefresh').addEventListener('click', async () => {
+       await loadAllStations();
+       // 혹시 모를 상태 꼬임 방지용
+       const level = map.getLevel();
+       markers.forEach(m => m.setMap(level <= 9 ? map : null));
+       polygons.forEach(p => p.setMap(level <= 9 ? null : map));
+   });
     window.addEventListener('load', loadAllStations);
-	
-	document.getElementById("btnCsv").addEventListener("click", () => {
-	    window.location.href = "/api/air/download/csv";
-	});
+   
+   document.getElementById("btnCsv").addEventListener("click", () => {
+       window.location.href = "/api/air/download/csv";
+   });
 
-	document.getElementById("btnExcel").addEventListener("click", () => {
-	    window.location.href = "/api/air/download/excel";
-	});
-	
-<!--	숫자 포맷팅 함수 -->
-	function fmt(n) {
-	    const num = Number(n);
-	    return isNaN(num) ? '-' : Number(num.toFixed(3));
-	}
+   document.getElementById("btnExcel").addEventListener("click", () => {
+       window.location.href = "/api/air/download/excel";
+   });
+   
+<!--   숫자 포맷팅 함수 -->
+   function fmt(n) {
+       const num = Number(n);
+       return isNaN(num) ? '-' : Number(num.toFixed(3));
+   }
 
-	let pmSidoAvg = {};
-	try {
-	    pmSidoAvg = JSON.parse('${sidoAvgJson}');
-	    console.log("시도 평균 데이터:", pmSidoAvg);
-	} catch (e) {
-	    console.error("❌ 시도 평균 JSON 파싱 실패:", e);
-	}
-
-
-	/* =========================================================
-	   2) 시도 등급 → 색상 변환
-	   ========================================================= */
-	function getColorByGrade(grade) {
-	    if (grade === "매우나쁨") return "#ff0000";   // 빨강
-	    if (grade === "나쁨") return "#ff7f00";       // 주황
-	    if (grade === "보통") return "#52c41a";       // 초록
-	    return "#3b82f6";                             // 파랑 (좋음)
-	}
+   let pmSidoAvg = {};
+   try {
+       pmSidoAvg = JSON.parse('${sidoAvgJson}');
+       console.log("시도 평균 데이터:", pmSidoAvg);
+   } catch (e) {
+       console.error("❌ 시도 평균 JSON 파싱 실패:", e);
+   }
 
 
-	/* =========================================================
-	   3) GeoJSON 시도명 → 평균맵 키 변환
-	      (서울특별시 → 서울, 경상북도 → 경북)
-	   ========================================================= */
-	function normalizeSido(name) {
-	    if (!name) return null;
-
-		// 광역시
-	    if (name.includes("서울특별시") || name.includes("서울")) return "서울";
-	    if (name.includes("부산광역시") || name.includes("부산")) return "부산";
-	    if (name.includes("대구광역시") || name.includes("대구")) return "대구";
-	    if (name.includes("인천광역시") || name.includes("인천")) return "인천";
-	    if (name.includes("광주광역시") || name.includes("광주")) return "광주";
-	    if (name.includes("대전광역시") || name.includes("대전")) return "대전";
-	    if (name.includes("울산광역시") || name.includes("울산")) return "울산";
-	    if (name.includes("세종특별자치시") || name.includes("세종")) return "세종";
-
-	    // 도
-	    if (name.includes("경기도") || name.includes("경기")) return "경기";
-	    if (name.includes("강원도") || name.includes("강원")) return "강원";
-
-	    if (name.includes("충청북도") || name.includes("충북")) return "충북";
-	    if (name.includes("충청남도") || name.includes("충남")) return "충남";
-
-	    if (name.includes("전라북도") || name.includes("전북")) return "전북";
-	    if (name.includes("전라남도") || name.includes("전남")) return "전남";
-
-	    if (name.includes("경상북도") || name.includes("경북")) return "경북";
-	    if (name.includes("경상남도") || name.includes("경남")) return "경남";
-
-	    if (name.includes("제주특별자치도") || name.includes("제주")) return "제주";
-
-	    return null;
-	}
-
-	function getGradeTextByKhai(khaiGrade) {
-	    if (khaiGrade <= 50) return "좋음";
-	    if (khaiGrade <= 100) return "보통";
-	    if (khaiGrade <= 250) return "나쁨";
-	    return "매우나쁨";
-	}
-	/* =========================================================
-	   4) 시도 경계 GeoJSON 받아서 폴리곤 그리기
-	   ========================================================= */
-	const polygons = [];
-	function drawSidoRegions(geojson) {
-
-	    geojson.features.forEach(feature => {
-
-	        const props = feature.properties;
-	        const sidoFull = props.CTP_KOR_NM;       // GeoJSON 시도이름 (예: 서울특별시)
-	        const sidoKey = normalizeSido(sidoFull); // 평균값 키 (예: 서울)
-
-	        if (!sidoKey) return;
-
-	        const avgObj = pmSidoAvg[sidoKey];
-	        if (!avgObj) return;
-
-			const grade = getGradeTextByKhai(avgObj.khaiGrade);
-			const fillColor = getColorByGrade(grade);
-
-	        const geom = feature.geometry;
-	        const coords = geom.coordinates;
-	        const paths = [];
-
-	        // polygon
-	        if (geom.type === "Polygon") {
-	            coords.forEach(poly => {
-	                paths.push(poly.map(c => new kakao.maps.LatLng(c[1], c[0])));
-	            });
-	        }
-	        // multipolygon
-	        else if (geom.type === "MultiPolygon") {
-	            coords.forEach(multi => {
-	                multi.forEach(poly => {
-	                    paths.push(poly.map(c => new kakao.maps.LatLng(c[1], c[0])));
-	                });
-	            });
-	        }
-
-	        // 실제 폴리곤 생성
-	        const polygon = new kakao.maps.Polygon({
-	            map: map,
-	            path: paths,
-	            strokeWeight: 2,
-	            strokeColor: "#222",
-	            strokeOpacity: 1,
-	            fillColor: fillColor,
-	            fillOpacity: 0.55
-	        });
-			polygon.setMap(map);
-	        polygons.push(polygon);
-	        // 마우스 효과
-	        kakao.maps.event.addListener(polygon, "mouseover", () => {
-	            polygon.setOptions({ fillOpacity: 0.8 });
-	        });
-
-	        kakao.maps.event.addListener(polygon, "mouseout", () => {
-	            polygon.setOptions({ fillOpacity: 0.55 });
-	        });
-
-			kakao.maps.event.addListener(polygon, "click", (mouseEvent) => {
-			    // 1) 클릭한 실제 좌표
-			    const clickPos = mouseEvent.latLng;
-
-			    console.log("시도 클릭:", sidoFull, "클릭좌표:", clickPos.getLat(), clickPos.getLng());
-
-			    // 2) 폴리곤은 숨기고 마커는 보이게
-			    polygons.forEach(p => p.setMap(null));
-			    markers.forEach(m => m.setMap(map));
-
-			    // 3) 클릭한 지점으로 이동 + 관측소가 잘 보이는 레벨로 확대
-			    map.setCenter(clickPos);
-			    map.setLevel(9);  // 🔥 조절 가능: 7~9 추천
-
-			    toast(`${sidoFull} 지역으로 이동했습니다.`);
-			});
-	    });
-	}
+   /* =========================================================
+      2) 시도 등급 → 색상 변환
+      ========================================================= */
+   function getColorByGrade(grade) {
+       if (grade === "매우나쁨") return "#ff0000";   // 빨강
+       if (grade === "나쁨") return "#ff7f00";       // 주황
+       if (grade === "보통") return "#52c41a";       // 초록
+       return "#3b82f6";                             // 파랑 (좋음)
+   }
 
 
-	/* =========================================================
-	   5) GeoJSON 로딩 시작
-	   ========================================================= */
-	fetch("/geo/TL_SCCO_CTPRVN.json")
-	    .then(res => res.json())
-	    .then(json => {
-	        console.log("시도 GeoJSON 로드 완료");
-	        map.setLevel(10); // 시도 단위 잘 보이도록
-	        drawSidoRegions(json);
-	    })
-	    .catch(err => console.error("❌ 시도 GeoJSON 로드 실패:", err));
-	// 6) 폴리곤 & 마커 ON/OFF 처리
-	kakao.maps.event.addListener(map, 'zoom_changed', function () {
-	    const level = map.getLevel();
+   /* =========================================================
+      3) GeoJSON 시도명 → 평균맵 키 변환
+         (서울특별시 → 서울, 경상북도 → 경북)
+      ========================================================= */
+   function normalizeSido(name) {
+       if (!name) return null;
 
-	    // 마커 표시: 확대일 때만
-	    markers.forEach(marker => {
-	        if (level <= 9) marker.setMap(map);
-	        else marker.setMap(null);
-	    });
+      // 광역시
+       if (name.includes("서울특별시") || name.includes("서울")) return "서울";
+       if (name.includes("부산광역시") || name.includes("부산")) return "부산";
+       if (name.includes("대구광역시") || name.includes("대구")) return "대구";
+       if (name.includes("인천광역시") || name.includes("인천")) return "인천";
+       if (name.includes("광주광역시") || name.includes("광주")) return "광주";
+       if (name.includes("대전광역시") || name.includes("대전")) return "대전";
+       if (name.includes("울산광역시") || name.includes("울산")) return "울산";
+       if (name.includes("세종특별자치시") || name.includes("세종")) return "세종";
 
-	    // 폴리곤 표시: 축소일 때만
-	    polygons.forEach(poly => {
-	        if (level <= 9) poly.setMap(null);   // 시도 폴리곤 숨김 (확대 시)
-	        else poly.setMap(map);               // 축소 시 다시 보임
-	    });
-	});
-	// GeoJSON paths(엄청 깊은 배열) → bounds 로 넣어주는 재귀 함수
-	function addBoundsFromPaths(arr, bounds) {
-	  if (!arr) return;
+       // 도
+       if (name.includes("경기도") || name.includes("경기")) return "경기";
+       if (name.includes("강원도") || name.includes("강원")) return "강원";
 
-	  arr.forEach(item => {
-	    // LatLng 객체
-	    if (item instanceof kakao.maps.LatLng) {
-	      bounds.extend(item);
-	    }
-	    // [lng, lat] 숫자 배열
-	    else if (
-	      Array.isArray(item) &&
-	      item.length === 2 &&
-	      typeof item[0] === "number" &&
-	      typeof item[1] === "number"
-	    ) {
-	      const latlng = new kakao.maps.LatLng(item[1], item[0]);
-	      bounds.extend(latlng);
-	    }
-	    // 더 깊은 배열
-	    else if (Array.isArray(item)) {
-	      addBoundsFromPaths(item, bounds);
-	    }
-	  });
-	}
-	// 지도 줌 변경 시 저장
-	kakao.maps.event.addListener(map, 'zoom_changed', () => {
-	    localStorage.setItem("savedLevel", map.getLevel());
-	});
+       if (name.includes("충청북도") || name.includes("충북")) return "충북";
+       if (name.includes("충청남도") || name.includes("충남")) return "충남";
 
-	// 지도 이동 시 저장
-	kakao.maps.event.addListener(map, 'center_changed', () => {
-	    const c = map.getCenter();
-	    localStorage.setItem("savedLat", c.getLat());
-	    localStorage.setItem("savedLng", c.getLng());
-	});
-	// 저장된 지도 상태가 있으면 복원
-	const savedLevel = localStorage.getItem("savedLevel");
-	const savedLat = localStorage.getItem("savedLat");
-	const savedLng = localStorage.getItem("savedLng");
+       if (name.includes("전라북도") || name.includes("전북")) return "전북";
+       if (name.includes("전라남도") || name.includes("전남")) return "전남";
 
-	if (savedLevel && savedLat && savedLng) {
-	    map.setLevel(Number(savedLevel));
-	    map.setCenter(new kakao.maps.LatLng(Number(savedLat), Number(savedLng)));
-	}
-	function updateVisibilityByZoom() {
-	    const level = map.getLevel();
+       if (name.includes("경상북도") || name.includes("경북")) return "경북";
+       if (name.includes("경상남도") || name.includes("경남")) return "경남";
 
-	    markers.forEach(marker => {
-	        marker.setMap(level <= 9 ? map : null);
-	    });
+       if (name.includes("제주특별자치도") || name.includes("제주")) return "제주";
 
-	    polygons.forEach(poly => {
-	        poly.setMap(level <= 9 ? null : map);
-	    });
-	}
-	window.addEventListener("load", () => {
-	    setTimeout(updateVisibilityByZoom, 50);
-	});
+       return null;
+   }
+
+   function getGradeTextByKhai(khaiGrade) {
+       if (khaiGrade <= 50) return "좋음";
+       if (khaiGrade <= 100) return "보통";
+       if (khaiGrade <= 250) return "나쁨";
+       return "매우나쁨";
+   }
+   /* =========================================================
+      4) 시도 경계 GeoJSON 받아서 폴리곤 그리기
+      ========================================================= */
+   const polygons = [];
+   function drawSidoRegions(geojson) {
+
+       geojson.features.forEach(feature => {
+
+           const props = feature.properties;
+           const sidoFull = props.CTP_KOR_NM;       // GeoJSON 시도이름 (예: 서울특별시)
+           const sidoKey = normalizeSido(sidoFull); // 평균값 키 (예: 서울)
+
+           if (!sidoKey) return;
+
+           const avgObj = pmSidoAvg[sidoKey];
+           if (!avgObj) return;
+
+         const grade = getGradeTextByKhai(avgObj.khaiGrade);
+         const fillColor = getColorByGrade(grade);
+
+           const geom = feature.geometry;
+           const coords = geom.coordinates;
+           const paths = [];
+
+           // polygon
+           if (geom.type === "Polygon") {
+               coords.forEach(poly => {
+                   paths.push(poly.map(c => new kakao.maps.LatLng(c[1], c[0])));
+               });
+           }
+           // multipolygon
+           else if (geom.type === "MultiPolygon") {
+               coords.forEach(multi => {
+                   multi.forEach(poly => {
+                       paths.push(poly.map(c => new kakao.maps.LatLng(c[1], c[0])));
+                   });
+               });
+           }
+
+           // 실제 폴리곤 생성
+           const polygon = new kakao.maps.Polygon({
+               map: map,
+               path: paths,
+               strokeWeight: 2,
+               strokeColor: "#222",
+               strokeOpacity: 1,
+               fillColor: fillColor,
+               fillOpacity: 0.55
+           });
+         polygon.setMap(map);
+           polygons.push(polygon);
+           // 마우스 효과
+           kakao.maps.event.addListener(polygon, "mouseover", () => {
+               polygon.setOptions({ fillOpacity: 0.8 });
+           });
+
+           kakao.maps.event.addListener(polygon, "mouseout", () => {
+               polygon.setOptions({ fillOpacity: 0.55 });
+           });
+
+         kakao.maps.event.addListener(polygon, "click", (mouseEvent) => {
+             // 1) 클릭한 실제 좌표
+             const clickPos = mouseEvent.latLng;
+
+             console.log("시도 클릭:", sidoFull, "클릭좌표:", clickPos.getLat(), clickPos.getLng());
+
+             // 2) 폴리곤은 숨기고 마커는 보이게
+             polygons.forEach(p => p.setMap(null));
+             markers.forEach(m => m.setMap(map));
+
+             // 3) 클릭한 지점으로 이동 + 관측소가 잘 보이는 레벨로 확대
+             map.setCenter(clickPos);
+             map.setLevel(9);  // 🔥 조절 가능: 7~9 추천
+
+             toast(`${sidoFull} 지역으로 이동했습니다.`);
+         });
+       });
+   }
+
+
+   /* =========================================================
+      5) GeoJSON 로딩 시작
+      ========================================================= */
+   fetch("/geo/TL_SCCO_CTPRVN.json")
+       .then(res => res.json())
+       .then(json => {
+           console.log("시도 GeoJSON 로드 완료");
+           map.setLevel(10); // 시도 단위 잘 보이도록
+           drawSidoRegions(json);
+       })
+       .catch(err => console.error("❌ 시도 GeoJSON 로드 실패:", err));
+   // 6) 폴리곤 & 마커 ON/OFF 처리
+   kakao.maps.event.addListener(map, 'zoom_changed', function () {
+       const level = map.getLevel();
+
+       // 마커 표시: 확대일 때만
+       markers.forEach(marker => {
+           if (level <= 9) marker.setMap(map);
+           else marker.setMap(null);
+       });
+
+       // 폴리곤 표시: 축소일 때만
+       polygons.forEach(poly => {
+           if (level <= 9) poly.setMap(null);   // 시도 폴리곤 숨김 (확대 시)
+           else poly.setMap(map);               // 축소 시 다시 보임
+       });
+   });
+   // GeoJSON paths(엄청 깊은 배열) → bounds 로 넣어주는 재귀 함수
+   function addBoundsFromPaths(arr, bounds) {
+     if (!arr) return;
+
+     arr.forEach(item => {
+       // LatLng 객체
+       if (item instanceof kakao.maps.LatLng) {
+         bounds.extend(item);
+       }
+       // [lng, lat] 숫자 배열
+       else if (
+         Array.isArray(item) &&
+         item.length === 2 &&
+         typeof item[0] === "number" &&
+         typeof item[1] === "number"
+       ) {
+         const latlng = new kakao.maps.LatLng(item[1], item[0]);
+         bounds.extend(latlng);
+       }
+       // 더 깊은 배열
+       else if (Array.isArray(item)) {
+         addBoundsFromPaths(item, bounds);
+       }
+     });
+   }
+   // 지도 줌 변경 시 저장
+   kakao.maps.event.addListener(map, 'zoom_changed', () => {
+       localStorage.setItem("savedLevel", map.getLevel());
+   });
+
+   // 지도 이동 시 저장
+   kakao.maps.event.addListener(map, 'center_changed', () => {
+       const c = map.getCenter();
+       localStorage.setItem("savedLat", c.getLat());
+       localStorage.setItem("savedLng", c.getLng());
+   });
+   // 저장된 지도 상태가 있으면 복원
+   const savedLevel = localStorage.getItem("savedLevel");
+   const savedLat = localStorage.getItem("savedLat");
+   const savedLng = localStorage.getItem("savedLng");
+
+   if (savedLevel && savedLat && savedLng) {
+       map.setLevel(Number(savedLevel));
+       map.setCenter(new kakao.maps.LatLng(Number(savedLat), Number(savedLng)));
+   }
+   function updateVisibilityByZoom() {
+       const level = map.getLevel();
+
+       markers.forEach(marker => {
+           marker.setMap(level <= 9 ? map : null);
+       });
+
+       polygons.forEach(poly => {
+           poly.setMap(level <= 9 ? null : map);
+       });
+   }
+   window.addEventListener("load", () => {
+       setTimeout(updateVisibilityByZoom, 50);
+   });
+window.addEventListener('DOMContentLoaded', function() {
+     initChatbot();
+   });
+   
+
+   // 타이핑 표시
+   function showTyping() {
+     const box = document.getElementById("chatMessages");
+     if (document.getElementById("typing-indicator")) return;
+
+     const wrapper = document.createElement("div");
+     wrapper.className = "chat-msg bot";
+     wrapper.id = "typing-indicator";
+     wrapper.innerHTML = `
+       <div class="msg-bubble typing-animation">
+         <span class="dot"></span>
+         <span class="dot"></span>
+         <span class="dot"></span>
+       </div>
+     `;
+     box.appendChild(wrapper);
+     box.scrollTop = box.scrollHeight;
+   }
+
+   // 타이핑 표시 숨기기
+   function hideTyping() {
+     const typing = document.getElementById("typing-indicator");
+     if (typing) typing.remove();
+   }
+
+   // 챗봇 관련 초기화
+   function initChatbot() {
+     const btnChatbotOpen = document.getElementById("chatbotBtn");
+     const btnChatbotClose = document.getElementById("chatbotClose");
+     const btnSend = document.getElementById("sendBtn");
+     const chatInput = document.getElementById("chatInput");
+
+     if (btnChatbotOpen) {
+       btnChatbotOpen.addEventListener("click", () => {
+         document.getElementById("chatbotModal").style.display = "block";
+       });
+     }
+
+     if (btnChatbotClose) {
+       btnChatbotClose.addEventListener("click", () => {
+         document.getElementById("chatbotModal").style.display = "none";
+       });
+     }
+
+     if (btnSend) {
+       btnSend.addEventListener("click", () => {
+         console.log('전송 버튼 클릭');
+         sendUserMessage(chatInput.value);
+       });
+     }
+
+     if (chatInput) {
+       chatInput.addEventListener("keydown", (e) => {
+         if (e.key === "Enter") {
+           console.log('엔터키 눌림');
+           sendUserMessage(chatInput.value);
+         }
+       });
+     }
+   }
+
+   // 메시지 전송 함수
+   function sendUserMessage(message) {
+     if (!message.trim()) return;
+
+     displayMessage(message, "user");
+     document.getElementById("chatInput").value = "";
+
+     showTyping();
+
+     fetch('/api/gemini', {
+       method: 'POST',
+       headers: { "Content-Type": "application/json" },
+       body: JSON.stringify({ message: message })
+     })
+       .then(resp => resp.json())
+       .then(data => {
+         hideTyping();
+         const botText = data.contents?.[0]?.parts?.[0]?.text || "응답이 없습니다";
+         displayMessage(botText, "bot");
+       })
+       .catch(err => {
+         hideTyping();
+         displayMessage("“지금 Gemini가 잠시 바쁨! 조금 뒤 다시 시도해줘 😊”", "bot");
+         console.error('Fetch error:', err);
+       });
+   }
+
+
+   // 화면에 메시지 출력
+   function displayMessage(text, sender = "bot") {
+     const box = document.getElementById("chatMessages");
+
+     const wrapper = document.createElement("div");
+     wrapper.className = sender === "user" ? "chat-msg user" : "chat-msg bot";
+
+     if (sender === "bot") {
+       const avatar = document.createElement("img");
+       avatar.className = "chat-avatar";
+       avatar.src = "/img/bot.png";
+       wrapper.appendChild(avatar);
+     }
+
+     const bubble = document.createElement("div");
+     bubble.className = "msg-bubble";
+     bubble.innerHTML = text;
+     wrapper.appendChild(bubble);
+
+     box.appendChild(wrapper);
+     box.scrollTop = box.scrollHeight;
+   }
   </script>
 </body>
 </html>
