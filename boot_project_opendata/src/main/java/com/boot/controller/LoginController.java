@@ -98,7 +98,7 @@ public class LoginController {
 
         boolean ok = userService.loginYn(param);
 
-        if (오케이) {
+        if (ok) {
             userService.resetLoginFail(userId);
             session.setAttribute("loginId", userId);
             session.setAttribute("loginDisplayName", user.getUser_name());
