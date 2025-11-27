@@ -98,7 +98,7 @@ public class LoginController {
 
         boolean ok = userService.loginYn(param);
 
-        if (ok) {
+        if (오케이) {
             userService.resetLoginFail(userId);
             session.setAttribute("loginId", userId);
             session.setAttribute("loginDisplayName", user.getUser_name());
@@ -221,7 +221,7 @@ public class LoginController {
     }
     @GetMapping("/admin/otp")
     public String adminOTPPage() {
-    	return "admin/adminOTP"; // adminOTP.jsp 로 이동
+       return "admin/adminOTP"; // adminOTP.jsp 로 이동
     }
     
     @PostMapping("/admin/otpCheck")
@@ -259,7 +259,7 @@ public class LoginController {
         session.removeAttribute("adminOTP");
         session.removeAttribute("adminOTPExpireAt");
 
-        session.setAttribute("userId", session.getAttribute("tempAdminId"));
+        session.setAttribute("adminId", session.getAttribute("tempAdminId"));
         session.setAttribute("loginDisplayName", session.getAttribute("tempAdminName"));
         session.setAttribute("isAdmin", true);
         session.setAttribute("role", "ADMIN");
