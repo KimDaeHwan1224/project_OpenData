@@ -125,8 +125,6 @@
            <button id="btnMyPos">내 위치</button>
            <button id="btnRefresh">새로고침</button>
          </div>
-		 <button id="btnPolygonMode">폴리곤 모드</button>
-		 <button id="btnNormalMode" style="display:none;">일반 모드</button>
 		 
          <div class="overlay-left">
            <h3>대기질 등급</h3>
