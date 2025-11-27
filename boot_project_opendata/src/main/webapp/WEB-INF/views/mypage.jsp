@@ -96,7 +96,7 @@
         <a href="/main" class="nav-category">상세정보</a>
         <a href="/board/list" class="nav-board">게시판</a>
         <a href="/notice" class="nav-notice">공지사항</a>
-        <a href="<c:url value='/inquiry'/>" class="nav-inquiry">1:1 문의</a>
+        <a href="/qna" class="nav-qna">QnA</a>
       </div>
     </div>
   </div>
@@ -206,51 +206,52 @@
 	        </div>
 
 
-      <!-- 관심 지역 조회 섹션 -->
-      <div class="mypage-card">
-        <div class="card-header">
-          <h2 class="card-title">
-            <span class="card-title-icon">📍</span>
-            관심 지역 조회
-          </h2>
-<!--          <div class="card-action">-->
-<!--            <a href="<c:url value='/mypage/region/add'/>" class="btn btn-primary">지역 추가</a>-->
-<!--          </div>-->
-        </div>
-        <div class="region-grid">
-			<c:choose>
-			    <c:when test="${not empty favorites}">
-					<c:forEach var="region" items="${favorites}">
-					    <div class="region-card">
-					        <!-- stationName으로 정확히 호출 -->
-					        <h3 class="region-name">${region.stationName}</h3>
-					        <span class="region-grade 
-					            ${region.pm10Value <= 30 ? 'good' :
-					              region.pm10Value <= 80 ? 'normal' :
-					              region.pm10Value <= 150 ? 'bad' : 'very-bad'}">
-					            <c:choose>
-					                <c:when test="${region.pm10Value <= 30}">좋음</c:when>
-					                <c:when test="${region.pm10Value <= 80}">보통</c:when>
-					                <c:when test="${region.pm10Value <= 150}">나쁨</c:when>
-					                <c:otherwise>매우 나쁨</c:otherwise>
-					            </c:choose>
-					        </span>
-					        <div style="margin-top: 12px; font-size: 14px; color: var(--muted);">
-					            미세먼지: ${region.pm10Value} ㎍/㎥
-					        </div>
-					        <!-- 삭제 버튼: favoriteId로 호출 -->
-					        <button class="region-remove" onclick="removeRegion(${region.favoriteId})">삭제</button>
-					    </div>
-					</c:forEach>
-			    </c:when>
-			    <c:otherwise>
-			        <div class="empty-message" style="grid-column: 1 / -1;">
-			            등록된 관심 지역이 없습니다. 지역을 추가해보세요.
+			<!-- 관심 지역 조회 섹션 -->
+			      <div class="mypage-card">
+			        <div class="card-header">
+			          <h2 class="card-title">
+			            <span class="card-title-icon">📍</span>
+			            관심 지역 조회
+			          </h2>
+			<!--          <div class="card-action">-->
+			<!--            <a href="<c:url value='/mypage/region/add'/>" class="btn btn-primary">지역 추가</a>-->
+			<!--          </div>-->
 			        </div>
-			    </c:otherwise>
-			</c:choose>
-        </div>
-      </div>
+			        <div class="region-grid">
+						<c:choose>
+						    <c:when test="${not empty favorites}">
+								<c:forEach var="region" items="${favorites}">
+								    <div class="region-card">
+								        <!-- stationName으로 정확히 호출 -->
+								        <h3 class="region-name">${region.stationName}</h3>
+								        <span class="region-grade 
+								            ${region.pm10Value <= 30 ? 'good' :
+								              region.pm10Value <= 80 ? 'normal' :
+								              region.pm10Value <= 150 ? 'bad' : 'very-bad'}">
+								            <c:choose>
+								                <c:when test="${region.pm10Value <= 30}">좋음</c:when>
+								                <c:when test="${region.pm10Value <= 80}">보통</c:when>
+								                <c:when test="${region.pm10Value <= 150}">나쁨</c:when>
+								                <c:otherwise>매우 나쁨</c:otherwise>
+								            </c:choose>
+								        </span>
+								        <div style="margin-top: 12px; font-size: 14px; color: var(--muted);">
+								            미세먼지: ${region.pm10Value} ㎍/㎥
+								        </div>
+								        <!-- 삭제 버튼: favoriteId로 호출 -->
+								        <button class="region-remove" onclick="removeRegion(${region.favoriteId})">삭제</button>
+								    </div>
+								</c:forEach>
+						    </c:when>
+						    <c:otherwise>
+						        <div class="empty-message" style="grid-column: 1 / -1;">
+						            등록된 관심 지역이 없습니다. 지역을 추가해보세요.
+						        </div>
+						    </c:otherwise>
+						</c:choose>
+			        </div>
+			      </div>
+
     </div>
   </section>
   
