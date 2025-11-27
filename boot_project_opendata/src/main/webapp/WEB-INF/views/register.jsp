@@ -55,6 +55,22 @@ $(function(){
             }
         });
     });
+
+    // 전체 동의 체크박스 이벤트
+    $("#terms_all").change(function(){
+        const isChecked = $(this).is(":checked");
+        $("#terms_required_service").prop("checked", isChecked);
+        $("#terms_required_privacy").prop("checked", isChecked);
+        $("#terms_optional_marketing").prop("checked", isChecked);
+    });
+
+    // 개별 약관 체크박스 이벤트
+    $("#terms_required_service, #terms_required_privacy, #terms_optional_marketing").change(function(){
+        const allChecked = $("#terms_required_service").is(":checked") && 
+                          $("#terms_required_privacy").is(":checked") && 
+                          $("#terms_optional_marketing").is(":checked");
+        $("#terms_all").prop("checked", allChecked);
+    });
 });
 </script>
 </head>
@@ -165,6 +181,39 @@ $(function(){
                         <input class="input" id="user_detail_address" name="user_detail_address" type="text" placeholder="동/호수 등" />
                     </div>
 
+                    <!-- 이용약관 동의 -->
+                    <div class="field terms-field">
+                        <div class="terms-item" style="margin-bottom: 8px; padding-bottom: 8px; border-bottom: 2px solid #ddd;">
+                            <input type="checkbox" id="terms_all" name="terms_all">
+                            <label for="terms_all" style="cursor: pointer; margin: 0; font-weight: 700; font-size: 1rem;">
+                                전체 동의
+                            </label>
+                        </div>
+                        <div class="terms-item">
+                            <input type="checkbox" id="terms_required_service" name="terms_required_service" value="Y" required>
+                            <label for="terms_required_service" style="cursor: pointer; margin: 0;">
+                                서비스 이용약관 동의 <span style="color: #e74c3c;">(필수)</span>
+                            </label>
+                            <button type="button" class="terms-more-btn" onclick="showTerms('service')">내용 보기</button>
+                        </div>
+                        <hr class="terms-divider">
+                        <div class="terms-item">
+                            <input type="checkbox" id="terms_required_privacy" name="terms_required_privacy" value="Y" required>
+                            <label for="terms_required_privacy" style="cursor: pointer; margin: 0;">
+                                개인정보 처리방침 동의 <span style="color: #e74c3c;">(필수)</span>
+                            </label>
+                            <button type="button" class="terms-more-btn" onclick="showTerms('privacy')">내용 보기</button>
+                        </div>
+                        <hr class="terms-divider">
+                        <div class="terms-item">
+                            <input type="checkbox" id="terms_optional_marketing" name="terms_optional_marketing" value="Y">
+                            <label for="terms_optional_marketing" style="cursor: pointer; margin: 0;">
+                                대기질 관련 공지 및 서비스 안내 수신 동의 <span style="color: #999;">(선택)</span>
+                            </label>
+                            <button type="button" class="terms-more-btn" onclick="showTerms('optional')">내용 보기</button>
+                        </div>
+                    </div>
+
                     <!-- 제출 -->
                     <div class="submit">
                         <button type="button" class="btn btn-primary" onclick="check_ok()" id="register_btn">회원가입 완료</button>
@@ -188,6 +237,21 @@ $(function(){
 	  <a href="#">개인정보처리방침</a>
 	</footer>
 
+	<!-- 약관 모달 -->
+	<div id="termsModal" class="terms-modal" onclick="if(event.target === this) closeTermsModal()">
+		<div class="terms-modal-content" onclick="event.stopPropagation()">
+			<div class="terms-modal-header">
+				<h3 id="termsModalTitle">약관 제목</h3>
+				<button type="button" class="modal-close" onclick="closeTermsModal()">&times;</button>
+			</div>
+			<div class="terms-modal-body">
+				<div id="termsModalText"></div>
+			</div>
+			<div class="terms-modal-footer">
+				<button type="button" class="btn btn-primary" onclick="closeTermsModal()">확인</button>
+			</div>
+		</div>
+	</div>
 
     <!-- 외부 JS -->
   	<script src="/js/register.js"></script>
