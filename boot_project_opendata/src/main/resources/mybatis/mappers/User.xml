@@ -167,4 +167,22 @@
 		AND user_pw = #{user_pw}
 	</delete>
 
+	<!-- 이용약관 동의 내역 저장 -->
+	<insert id="insertUserTermsAgreement" parameterType="map">
+		INSERT INTO user_terms_agreement (
+			user_id,
+			terms_type,
+			agreed,
+			agreed_date,
+			terms_version
+		)
+		VALUES (
+			#{user_id},
+			#{terms_type},
+			#{agreed},
+			SYSTIMESTAMP,
+			NVL(#{terms_version}, '1.0')
+		)
+	</insert>
+
 </mapper>
