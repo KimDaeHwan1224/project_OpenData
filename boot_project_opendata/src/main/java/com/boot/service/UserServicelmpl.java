@@ -8,6 +8,7 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.boot.dao.FavoriteStationDAO;
 import com.boot.dao.UserDAO;
@@ -64,14 +65,43 @@ public class UserServicelmpl implements UserService {
 	}
 
 
-	/** 회원가입 로직 */
+	/** 회원가입 로직 + 약관 동의 저장 */
 	@Override
+	@Transactional
 	public int register(Map<String, String> param) {
 	    String rawPw = param.get("user_pw");          // 입력된 비번
 	    String encodedPw = passwordEncoder.encode(rawPw);  // 암호화
 	    param.put("user_pw", encodedPw);              // 암호화된 비번 저장
 	    
-	    return sqlSession.insert("com.boot.dao.UserDAO.register", param);
+	    int result = sqlSession.insert("com.boot.dao.UserDAO.register", param);
+
+	    // 회원 insert 성공 시 약관 동의 내역 저장
+	    if (result == 1) {
+	        String userId = param.get("user_id");
+	        String termsVersion = param.getOrDefault("terms_version", "1.0");
+
+	        Map<String, Object> termsParam = new HashMap<>();
+	        termsParam.put("user_id", userId);
+	        termsParam.put("terms_version", termsVersion);
+
+	        if ("Y".equals(param.get("terms_required_service"))) {
+	            termsParam.put("terms_type", "REQUIRED_SERVICE");
+	            termsParam.put("agreed", "Y");
+	            sqlSession.insert("com.boot.dao.UserDAO.insertUserTermsAgreement", termsParam);
+	        }
+	        if ("Y".equals(param.get("terms_required_privacy"))) {
+	            termsParam.put("terms_type", "REQUIRED_PRIVACY");
+	            termsParam.put("agreed", "Y");
+	            sqlSession.insert("com.boot.dao.UserDAO.insertUserTermsAgreement", termsParam);
+	        }
+	        if ("Y".equals(param.get("terms_optional_marketing"))) {
+	            termsParam.put("terms_type", "OPTIONAL_MARKETING");
+	            termsParam.put("agreed", "Y");
+	            sqlSession.insert("com.boot.dao.UserDAO.insertUserTermsAgreement", termsParam);
+	        }
+	    }
+
+	    return result;
 	}
 
 	public int withdraw(Map<String, String> param) {
