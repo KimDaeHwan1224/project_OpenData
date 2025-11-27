@@ -158,6 +158,16 @@ public class AirQualityService {
 
         return list;
     }
+    
+    public AirQualityDTO getStationDetailData(String stationName) {
+        
+        List<AirQualityDTO> allData = getAllAirQuality(); // Redis 또는 API에서 전체 데이터 로드
+        
+        return allData.stream()
+                .filter(data -> data.getStationName().equals(stationName))
+                .findFirst()
+                .orElse(null); // 해당 측정소 데이터가 없으면 null 반환
+    }
 
     private Integer parseInteger(String text) {
         try {
@@ -189,5 +199,7 @@ public class AirQualityService {
         if (v <= 0.200) return 3;
         return 4;
     }
+    
+    
 }
 
