@@ -122,5 +122,24 @@ public class MailService {
             e.printStackTrace();
         }
     }
+	// 🔥 관리자 OTP 발송용 (내용만 다름)
+    public void sendAdminOTP(String email, int otp) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            message.setFrom(senderEmail);
+            message.setRecipients(MimeMessage.RecipientType.TO, email);
+            message.setSubject("관리자 OTP 인증번호");
+
+            String html = "<h2>관리자 OTP 인증번호</h2>"
+                    + "<p>아래 OTP 번호를 입력해주세요:</p>"
+                    + "<h1>" + otp + "</h1>";
+
+            message.setText(html, "UTF-8", "html");
+            mailSender.send(message);
+
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+    }
     
 }
