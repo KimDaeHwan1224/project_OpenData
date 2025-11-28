@@ -921,6 +921,12 @@
 // 6) 폴리곤 & 마커 ON/OFF 처리
 	kakao.maps.event.addListener(map, 'zoom_changed', () => {
 	     updateVisibilityByZoom();
+		 // 상세 정보창 자동 닫기
+	     if (map.getLevel() > 9 && currentOverlay) {
+	         currentOverlay.setMap(null);
+	         currentOverlay = null;
+	         currentStationName = null;
+	     }
 	     localStorage.setItem('savedLevel', map.getLevel());
 	
 	     // 🔥 지도 확대되면(레벨 <= 9) 시도 정보창 강제로 제거
