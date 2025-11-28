@@ -22,7 +22,15 @@
 
 </head>
 <body>
+	<script>
+	        // 세션 만료 시간(숫자, ms)
+	        window.sessionExpireAt = ${sessionScope.sessionExpireAt == null ? 0 : sessionScope.sessionExpireAt};
 
+	        // 로그인 여부 (boolean)
+	        window.isLoggedIn = ${not empty sessionScope.loginId};
+	    </script>
+
+	    <script src="/js/sessionTimer.js"></script>
   <!-- 헤더 & 네비 -->
   <header>
     <nav class="nav" aria-label="주요 메뉴">
@@ -42,7 +50,11 @@
 		      </c:if>
 		      <a href="<c:url value='/logout'/>">로그아웃</a>
 		      <span class="user-name"><c:out value="${sessionScope.loginDisplayName}"/>님</span>
-				
+			  <!-- ⏱ 세션 타이머 -->
+			  			         <c:if test="${not empty sessionScope.loginId}">
+			  			             <span id="session-timer" style="margin-left:15px; font-weight:bold; font-size:16px; color:#333;">
+			  			             </span>
+			  			         </c:if>	
 		    </c:otherwise>
 		  </c:choose>
       </div>
@@ -367,7 +379,7 @@
   const markers = [];             // 측정소 오버레이
   const polygons = [];            // 시·도 폴리곤
   let pmSidoAvg = {};             // 시도 평균 값 (JSP에서 주입)
-  const isLoggedIn = ${not empty sessionScope.loginId};
+  const isLoggedInForFavorite = ${not empty sessionScope.loginId};
 
   /* JSP에서 주입되는 시도 평균 JSON 파싱 */
   try {
@@ -565,7 +577,7 @@
       e.stopPropagation();
       e.stopImmediatePropagation();
 
-      if (!isLoggedIn) {
+      if (!isLoggedInForFavorite) {
         if (confirm('로그인이 필요한 서비스입니다.\n로그인 페이지로 이동하시겠습니까?')) {
           window.location.href = '/login';
         }
