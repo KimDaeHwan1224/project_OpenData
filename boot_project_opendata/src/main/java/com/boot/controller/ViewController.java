@@ -42,7 +42,7 @@ public class ViewController {
     // 메인 페이지
     @GetMapping("/")
     public String main() {
-        return "main";
+        return "redirect:/main";
     }
     
     @GetMapping("/main")
