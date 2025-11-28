@@ -112,7 +112,6 @@
     </div>
   </div>
   <main>
-   <h2 class="section-title">실시간 대기질 정보</h2>
     <!-- 카카오 지도 섹션 (코드1의 고급 지도 기능) -->
    <section class="map-section">
      <div class="map-wrapper">
@@ -221,30 +220,6 @@
             <div class="tip-box">🪟 <b>환기</b>는 공기질 좋은 시간대에</div>
           </div>
         </div>
-
-		<!-- ✅ 새로 추가된 건강 정보 박스 -->
-        <div class="overlay-health">
-          <h2>🏥 건강 정보</h2>
-          <div class="health-row">
-            <div class="health-box">
-              <span class="health-grade good">좋음</span>
-              <span class="health-text">모든 활동 가능</span>
-            </div>
-            <div class="health-box">
-              <span class="health-grade normal">보통</span>
-              <span class="health-text">민감한 사람 주의</span>
-            </div>
-            <div class="health-box">
-              <span class="health-grade bad">나쁨</span>
-              <span class="health-text">외출 시 마스크 착용</span>
-            </div>
-            <div class="health-box">
-              <span class="health-grade verybad">매우나쁨</span>
-              <span class="health-text">외출 자제 권장</span>
-            </div>
-          </div>
-        </div>
-		
        </div>
      </div>
    </section>
