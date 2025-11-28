@@ -160,7 +160,6 @@
 		<a href="/adminMain" class="nav-category">상세정보</a>
 		<a href="/memberManagement" class="nav-board">회원관리</a>
 		<a href="/boardManagement" class="nav-notice">게시판관리</a>
-		<a href="/qna" class="nav-qna">지역관리</a>
       </div>
     </div>
   </div>
