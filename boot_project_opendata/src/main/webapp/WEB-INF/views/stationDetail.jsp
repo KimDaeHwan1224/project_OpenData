@@ -11,11 +11,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>대기질 정보 – 지역별 미세먼지 농도</title>
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@100..900&display=swap" rel="stylesheet">
   
-  <!-- Kakao Map SDK -->
   <script src="//dapi.kakao.com/v2/maps/sdk.js?appkey=246b6a1fdd8897003813a81be5f97cd5&libraries=services,clusterer"></script>
   <script src="/js/banner.js"></script>
   
@@ -23,6 +21,7 @@
   
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
+  /* (스타일 시트 내용 생략: 기존 코드와 동일) */
   .compare-btn {
     width: 100%;
     background: #2563eb;
@@ -308,7 +307,6 @@
 	  		  </script>
 
 	  		  <script src="/js/sessionTimer.js"></script>
-    <!-- 헤더 & 네비 -->
     <header>
       <nav class="nav" aria-label="주요 메뉴">
         <a href="/main" class="brand">대기질 정보</a>
@@ -325,8 +323,7 @@
               </c:if>
               <a href="<c:url value='/logout'/>">로그아웃</a>
               <span class="user-name"><c:out value="${sessionScope.loginDisplayName}"/>님</span>
-			  <!-- ⏱ 세션 타이머 -->
-			         <c:if test="${not empty sessionScope.loginId}">
+			  <c:if test="${not empty sessionScope.loginId}">
 			             <span id="session-timer" style="margin-left:15px; font-weight:bold; font-size:16px; color:#333;">
 			             </span>
 			         </c:if>
@@ -336,7 +333,6 @@
       </nav>
     </header>
 
-    <!-- 상단 프로모션 -->
     <div class="promo" role="note" aria-label="프로모션">
       <div class="promo-content">
         <div class="promo-nav">
@@ -349,9 +345,7 @@
     </div>
    <div class="container">
     <main>
-<!--    	<h1>${stationName}</h1>-->
-
-         <div class="detail-container">
+<div class="detail-container">
            <div class="detail-header">
              <h1>${stationName} 상세 대기 정보</h1>
              <p>측정 시간: ${detailData.dataTime}</p>
@@ -494,15 +488,17 @@
                       </div>
                   </div>
 
-        <div style="margin-top: 20px; text-align: center;">
-          <a href="/main" style="padding: 10px 20px; background: #3b82f6; color: white; text-decoration: none; border-radius: 4px;">메인으로 돌아가기</a>
-        </div>
        </main>
-       
-       <footer class="footer">
-         </footer>
-       <script src="/js/banner.js"></script>
-      <script src="/js/banner.js"></script>
+    </div> <footer class="footer">
+	     <h2>대기질 정보 시스템</h2>
+	     <p>대기질 정보 시스템 | 데이터 출처: 공공데이터포털 (data.go.kr)</p>
+	     <p>환경부 실시간 대기질 정보 제공</p>
+	     <p>주소: 부산시 부산진구 범내골</p>
+	     <br>
+	     <a href="#">이용약관</a>
+	     <a href="#">개인정보처리방침</a>
+	   </footer>
+    <script src="/js/banner.js"></script>
           
       <script>   
           // JSTL 변수를 JavaScript로 가져오기
