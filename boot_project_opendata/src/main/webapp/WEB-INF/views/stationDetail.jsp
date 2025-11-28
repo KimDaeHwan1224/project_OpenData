@@ -128,6 +128,7 @@
     font-size: 14px;
     color: #6b7280;
     margin-top: 5px;
+	text-align: right;
   }
 
   /* --- 상세 항목 레이아웃 개선 (그리드) --- */
@@ -331,7 +332,7 @@
           <a href="/main" class="nav-category">상세정보</a>
           <a href="/board/list" class="nav-board">게시판</a>
           <a href="/notice" class="nav-notice">공지사항</a>
-          <a href="/qna" class="nav-qna">QnA</a>
+          <a href="<c:url value='/inquiry'/>" class="nav-inquiry">1:1 문의</a>
         </div>
       </div>
     </div>
@@ -342,7 +343,7 @@
          <div class="detail-container">
            <div class="detail-header">
              <h1>${stationName} 상세 대기 정보</h1>
-             <p>측정 시간: ${Data.dataTime}</p>
+             <p>측정 시간: ${detailData.dataTime}</p>
            </div>
            
          <c:set var="data" value="${detailData}" />
