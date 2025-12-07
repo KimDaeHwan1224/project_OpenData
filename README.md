@@ -131,24 +131,28 @@
 ## 🧭 메뉴 구조도 (PDF)
 
 📄 메뉴 구조도 보기  
-👉 `/docs/menu-structure.pdf`
+👉 [menu-structure-opendata.pdf](https://github.com/user-attachments/files/24016774/menu-structure-opendata.pdf)
 
 ---
 
 ## 🖥 화면 설계서 (PDF)
 
 📄 화면 기획서 보기  
-👉 `/docs/ui-design.pdf`
+👉 [ui-design-opendata.pdf](https://github.com/user-attachments/files/24016796/ui-design-opendata.pdf)
 
 ---
 
 ## 🗂 ERD 및 테이블 명세서 (PDF)
 
 📄 ERD  
-➡ `/docs/erd.pdf`
+</details> <details> <summary><strong>ERD 다이어그램</strong> ●</summary>
+  
+<img width="1256" height="1110" alt="image" src="https://github.com/user-attachments/assets/0f7df47b-a454-498e-87ec-5de1a9bd6295" />
+
+</details>
 
 📄 테이블 명세서  
-➡ `/docs/table-definition.pdf`
+➡ [table-definition-opendata.ods](https://github.com/user-attachments/files/24016807/table-definition-opendata.ods)
 
 ---
 
