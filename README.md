@@ -159,82 +159,119 @@
 
 ## 🔍 핵심 구현 내용 (내가 담당한 기능)
 
-🔐 인증 / 회원 기능
-<details> <summary><strong>로그인 / 소셜 로그인(Kakao · Naver · Google)</strong> ●</summary>
+### 🔧 풀스택
+
+<details> <summary><strong>메인페이지</strong></summary>
+
 📌 설명
 
-OAuth2 기반 소셜 로그인 전체 플로우 구현
+메인페이지 전체 구현 (프론트엔드 + 백엔드)
 
-로그인/로그아웃 및 세션 기반 인증 처리
+지도 시각화 및 대기질 정보 표시
 
 📸 스크린샷
 
 (이미지)
 
-</details> <details> <summary><strong>아이디·비밀번호 찾기</strong> ●</summary>
-📌 설명
-
-이메일 기반 인증 코드 발송
-
-비밀번호 재설정 기능 구현
-
-</details> <details> <summary><strong>탈퇴 회원 관리 및 계정 상태 관리</strong> ●</summary>
-📌 설명
-
-탈퇴 시 실제 삭제가 아닌 상태값 변경 방식
-
-관리자 페이지에서 조회 가능하도록 구성
-
 </details>
-🧭 사용자 기능
-<details> <summary><strong>지역 데이터 기반 히트맵 시각화</strong> ●</summary>
+
+<details> <summary><strong>회원정보 수정 페이지</strong></summary>
+
 📌 설명
 
-공공데이터 기반 대기질 정보를 활용해 히트맵 생성
+회원정보 수정 기능 전체 구현
 
-수치에 따라 색상 자동 변경
+프론트엔드 UI 및 백엔드 API 연동
 
 📸 스크린샷
 
 (이미지)
 
-</details> <details> <summary><strong>CSV / Excel 다운로드 기능</strong> ●</summary>
+</details>
+
+<details> <summary><strong>마이페이지</strong></summary>
+
 📌 설명
 
-지역별 미세먼지 데이터 파일 제공
+마이페이지 전체 구현 (프론트엔드 + 백엔드)
 
-브라우저에서 즉시 다운로드 가능
+회원 정보 조회 및 관리 기능
 
-</details> <details> <summary><strong>지역별 실시간 대기질 조회</strong> ◐</summary>
-📌 설명
+📸 스크린샷
 
-(데이터는 API에서 받아왔지만 UI는 공통 작업)
+(이미지)
 
 </details>
-💬 커뮤니티 기능
-<details> <summary><strong>공지사항 조회</strong> ◐</summary>
+
+<details> <summary><strong>게시판</strong></summary>
+
 📌 설명
 
-사용자용 공지사항 조회 기능
+게시판 기능 전체 구현
+
+게시글 작성, 수정, 삭제, 조회 (프론트엔드 + 백엔드)
+
+📸 스크린샷
+
+(이미지)
 
 </details>
-🌐 공공데이터 기능
-</details> <details> <summary><strong>공공데이터 API 연동</strong> ◐</summary>
+
+<details> <summary><strong>관리자 메인 페이지</strong></summary>
+
 📌 설명
 
-국토환경공단 API 연동
+관리자 메인 페이지 UI/UX 구현
 
-JSON 데이터 수집 및 가공
+대시보드 및 관리 기능 접근
+
+📸 스크린샷
+
+(이미지)
 
 </details>
-<details> <summary><strong>지역 데이터 기반 히트맵 생성</strong> ●</summary>
+
+<details> <summary><strong>관리자 백엔드 구현</strong></summary>
+
 📌 설명
 
-공공데이터 API에서 받아온 값을 기반으로 오염도 가시화
+관리자 기능 백엔드 API 구현
 
-색상 스케일 설계 및 지도 오버레이 구현
+회원 관리, 게시판 관리 등 관리자 전용 기능 개발
 
-</details> <details> <summary><strong>실시간 미세먼지 정보 제공</strong> ◐</summary> </details>
+📸 스크린샷
+
+(이미지)
+
+</details>
+
+<details> <summary><strong>댓글 및 답글 기능</strong></summary>
+
+📌 설명
+
+댓글 및 대댓글 기능 전체 구현
+
+댓글 작성, 수정, 삭제, 답글 기능 (프론트엔드 + 백엔드)
+
+📸 스크린샷
+
+(이미지)
+
+</details>
+
+<details> <summary><strong>이용약관(회원가입)</strong></summary>
+
+📌 설명
+
+회원가입 시 이용약관 동의 기능 구현
+
+약관 동의 체크 및 처리 로직 (프론트엔드 + 백엔드)
+
+📸 스크린샷
+
+(이미지)
+
+</details>
 🛠 관리자 기능
 <details> <summary><strong>게시판 관리(공지사항·사용자게시판)</strong> ●</summary>
 📌 설명
