@@ -272,38 +272,6 @@
 (이미지)
 
 </details>
-🛠 관리자 기능
-<details> <summary><strong>게시판 관리(공지사항·사용자게시판)</strong> ●</summary>
-📌 설명
-
-관리자 전용 공지사항 CRUD
-
-사용자 게시판 관리 기능 전체 담당
-
-</details>
-⚡ 성능 / 서버 기능
-<details> <summary><strong>Redis 기반 캐싱 처리</strong> ●</summary>
-📌 설명
-
-실시간 대기질 데이터 조회 성능 개선
-
-API 호출 부담 감소
-
-</details> <details> <summary><strong>Spring Scheduler 기반 자동 업데이트</strong> ●</summary>
-📌 설명
-
-대기질 데이터 자동 수집·저장
-
-매일/매시간 단위 스케줄링 가능
-
-</details> <details> <summary><strong>AWS EC2 / 서버 배포</strong> ●</summary>
-📌 설명
-
-Ubuntu 기반 환경 구성
-
-Tomcat 연동
-
-</details>
 
 ## 📬 프로젝트 구조
 
