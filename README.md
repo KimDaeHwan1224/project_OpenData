@@ -296,8 +296,8 @@
 각 기능별 동작 방식과 흐름을 직관적으로 확인할 수 있습니다.
 
 ### 📌 전체 시연 영상
-🔗 YouTube 링크: https://youtu.be/3Dzys_04iNE (사용자)<br>
-🔗 YouTube 링크: https://youtu.be/qynV_2sgY8g (관리자)
+🔗 YouTube 링크: https://youtu.be/Hnlj6WZI0oQ (사용자)<br>
+🔗 YouTube 링크: https://youtu.be/cv0jVy17Loc (관리자)
 ---
 <!--
 ## ✨ 기능별 시연
