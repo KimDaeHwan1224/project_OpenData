@@ -225,19 +225,6 @@
 
 </details>
 
-<details> <summary><strong>관리자 백엔드 구현</strong></summary>
-
-📌 설명
-
-관리자 기능 백엔드 API 구현
-
-회원 관리, 게시판 관리 등 관리자 전용 기능 개발
-
-📸 스크린샷
-
-(이미지)
-
-</details>
 
 <details> <summary><strong>댓글 및 답글 기능</strong></summary>
 
