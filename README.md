@@ -165,7 +165,7 @@
 
 지도 시각화 및 대기질 정보 표시
 
-[![데모 영상](https://img.youtube.com/vi/oQ5Vsly1Spo/0.jpg)](https://www.youtube.com/watch?v=oQ5Vsly1Spo)
+![메인 페이지](image/메인%20페이지.png)
 
 </details>
 
